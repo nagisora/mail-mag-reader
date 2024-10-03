@@ -1,10 +1,9 @@
 "use client"
 
-import { dummyMailMagazines } from './mail-magazines';
-
-// src/app/page.tsx
 import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import jconv from 'jconv';
+import { dummyMailMagazines } from './mail-magazines';
 
 // Supabaseクライアントの初期化
 const supabase = createClient(
@@ -67,8 +66,6 @@ export default function Home() {
   );
 }
 
-import jconv from 'jconv';
-
 interface ParsedEmlFile {
   name: string;
   title: string;
@@ -88,14 +85,9 @@ async function parseEmlFile(file: File): Promise<ParsedEmlFile> {
   const day = String(match?.[3]?.padStart(2, '0') || '0');
   const issue_number = parseInt(`${year}${month}${day}`, 10); // 連結して整数に変換
 
-  // const htmlContent = (await file.text()).split('<h1>')[1] ? `<h1>${(await file.text()).split('<h1>')[1]}` : '';
-  // const content = jconv.convert(htmlContent, { from: 'JIS', to: 'UTF8' });
-  
-
   const rawContent = await file.text();
   const htmlContent = rawContent.split('<h1>')[1] ? `<h1>${rawContent.split('<h1>')[1]}` : '';
   const content = jconv.convert(htmlContent, 'JIS', 'UTF8').toString();
-
 
   return { name, title, issue_number, content };
 }

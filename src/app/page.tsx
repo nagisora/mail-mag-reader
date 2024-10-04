@@ -13,12 +13,14 @@ const supabase = createClient(
 
 export default function Home() {
   const [error, setError] = useState<string | null>(null);
+  const [mailMagazines, setMailMagazines] = useState<ParsedEmlFile[]>(dummyMailMagazines);
 
   const handleFileUpload = async (file: File) => {
     // EMLファイルの解析ロジックをここに追加
     const content = await parseEmlFile(file); // EMLファイルを解析して内容を取得
     console.log(content);
     
+    setMailMagazines([content]);
 
     // Supabaseにデータを保存
     // const { data, error } = await supabase
@@ -53,10 +55,11 @@ export default function Home() {
         </div>
         {error && <p className="text-red-500">{error}</p>}
         <div className="space-y-6">
-          {dummyMailMagazines.map((mailMagazine) => (
+          {mailMagazines.map((mailMagazine) => (
             <div key={mailMagazine.title} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+              <h3 className="text-lg font-medium mb-1">{mailMagazine.name}</h3>
               <h2 className="text-xl font-semibold mb-2">{mailMagazine.title}</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-2">{mailMagazine.date}</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-2">{mailMagazine.issue_number}</p>
               <div dangerouslySetInnerHTML={{ __html: mailMagazine.content }} />
             </div>
           ))}
@@ -68,8 +71,8 @@ export default function Home() {
 
 interface ParsedEmlFile {
   name: string;
-  title: string;
   issue_number: number;
+  title: string;
   content: string;
 }
 
@@ -89,5 +92,5 @@ async function parseEmlFile(file: File): Promise<ParsedEmlFile> {
   const htmlContent = rawContent.split('<h1>')[1] ? `<h1>${rawContent.split('<h1>')[1]}` : '';
   const content = jconv.convert(htmlContent, 'JIS', 'UTF8').toString();
 
-  return { name, title, issue_number, content };
+  return { name, issue_number, title, content };
 }

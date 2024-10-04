@@ -1,4 +1,4 @@
-interface MailMagazine {
+export interface MailMagazine {
   name: string;
   issue_number: number;
   title: string;

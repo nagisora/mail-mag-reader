@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import jconv from 'jconv';
-import { dummyMailMagazines } from './mail-magazines';
+import { dummyMailMagazines, MailMagazine } from './mail-magazines';
 
 // Supabaseクライアントの初期化
 const supabase = createClient(
@@ -13,7 +13,7 @@ const supabase = createClient(
 
 export default function Home() {
   const [error, setError] = useState<string | null>(null);
-  const [mailMagazines, setMailMagazines] = useState<ParsedEmlFile[]>(dummyMailMagazines);
+  const [mailMagazines, setMailMagazines] = useState<MailMagazine[]>(dummyMailMagazines);
 
   const handleFileUpload = async (file: File) => {
     // EMLファイルの解析ロジックをここに追加
@@ -69,15 +69,8 @@ export default function Home() {
   );
 }
 
-interface ParsedEmlFile {
-  name: string;
-  issue_number: number;
-  title: string;
-  content: string;
-}
-
 // EMLファイルを解析する関数
-async function parseEmlFile(file: File): Promise<ParsedEmlFile> {
+async function parseEmlFile(file: File): Promise<MailMagazine> {
   const name = '週刊Life is beautiful';
   const title = file.name.replace(/\.eml$/, '');
 

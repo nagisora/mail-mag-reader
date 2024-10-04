@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import jconv from 'jconv';
-import { dummyMailMagazines, MailMagazine } from './mail-magazines';
+import { dummyMailMagazine, MailMagazine } from './mail-magazines';
 
 // Supabaseクライアントの初期化
 const supabase = createClient(
@@ -13,27 +13,25 @@ const supabase = createClient(
 
 export default function Home() {
   const [error, setError] = useState<string | null>(null);
-  const [mailMagazines, setMailMagazines] = useState<MailMagazine[]>(dummyMailMagazines);
+  const [mailMagazine, setMailMagazine] = useState<MailMagazine>(dummyMailMagazine);
 
   const handleFileUpload = async (file: File) => {
     // EMLファイルの解析ロジックをここに追加
     const content = await parseEmlFile(file); // EMLファイルを解析して内容を取得
     console.log(content);
     
-    setMailMagazines([content]);
+    setMailMagazine(content);
 
     // Supabaseにデータを保存
-    // const { data, error } = await supabase
-    //   .from('newsletters')
-    //   .insert([
-    //     { name: 'メルマガ名', issue_number: 1, title: 'メルマガのタイトル', content }
-    //   ]);
+    const { data, error } = await supabase
+      .from('newsletters')
+      .insert(content);
 
-    // if (error) {
-    //   setError(error.message);
-    // } else {
-    //   console.log('Data saved:', data);
-    // }
+    if (error) {
+      setError(error.message);
+    } else {
+      console.log('Data saved:', data);
+    }
   };
 
   return (
@@ -55,14 +53,12 @@ export default function Home() {
         </div>
         {error && <p className="text-red-500">{error}</p>}
         <div className="space-y-6">
-          {mailMagazines.map((mailMagazine) => (
-            <div key={mailMagazine.title} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-              <h3 className="text-lg font-medium mb-1">{mailMagazine.name}</h3>
-              <h2 className="text-xl font-semibold mb-2">{mailMagazine.title}</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-2">{mailMagazine.issue_number}</p>
-              <div dangerouslySetInnerHTML={{ __html: mailMagazine.content }} />
-            </div>
-          ))}
+          <div key={mailMagazine.title} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <h3 className="text-lg font-medium mb-1">{mailMagazine.name}</h3>
+            <h2 className="text-xl font-semibold mb-2">{mailMagazine.title}</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-2">{mailMagazine.issue_number}</p>
+            <div dangerouslySetInnerHTML={{ __html: mailMagazine.content }} />
+          </div>
         </div>
       </div>
     </div>

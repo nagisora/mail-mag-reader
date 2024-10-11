@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import jconv from 'jconv';
 import { dummyMailMagazine, MailMagazine } from './mail-magazines';
@@ -14,34 +14,6 @@ const supabase = createClient(
 export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [mailMagazine, setMailMagazine] = useState<MailMagazine>(dummyMailMagazine);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  const handleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-    });
-
-    if (error) {
-      setError('サインインに失敗しました: ' + error.message);
-    }
-  };
-
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      setError('サインアウトに失敗しました: ' + error.message);
-    }
-  };
 
   const handleFileUpload = async (file: File) => {
     // EMLファイルの解析ロジックをここに追加
@@ -66,15 +38,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">メールマガジンリーダー</h1>
-        <div className="mb-6 flex justify-between items-center">
-          {user ? (
-            <div className="flex items-center space-x-4">
-              <span className="text-sm">{user.email}</span>
-              <button onClick={handleSignOut}>サインアウト</button>
-            </div>
-          ) : (
-            <button onClick={handleSignIn}>Googleでサインイン</button>
-          )}
+        <div className="mb-6">
           <input 
             type="file" 
             accept=".eml" 

@@ -1,14 +1,29 @@
 import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 export default function HomePage() {
   return (
-    <div>
-      <h1>メルマガリーダー</h1>
-      <nav>
-        <Link href="/login">ログイン</Link>
-        <Link href="/register">新規登録</Link>
-        <Link href="/newsletters">メルマガ一覧</Link>
-      </nav>
+    <div className="container mx-auto px-4 py-8">
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">メルマガリーダー</CardTitle>
+          <CardDescription className="text-center">お気に入りのメルマガを管理しましょう</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <nav className="flex flex-col space-y-4">
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/login">ログイン</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/register">新規登録</Link>
+            </Button>
+            <Button asChild variant="default" className="w-full">
+              <Link href="/newsletters">メルマガ一覧</Link>
+            </Button>
+          </nav>
+        </CardContent>
+      </Card>
     </div>
   );
 }

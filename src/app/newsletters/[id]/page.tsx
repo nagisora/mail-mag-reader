@@ -20,10 +20,10 @@ Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
 export default function NewsletterDetailPage({ params }: { params: { id: string } }) {
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 py-6">
       <ReadingProgressBar />
-      <h1 className="text-2xl font-bold mb-4">メルマガ詳細</h1>
-      <p className="mb-4">メルマガID: {params.id}</p>
+      <h1 className="text-3xl font-bold mb-4">メルマガ詳細</h1>
+      <p className="mb-4 text-gray-600">メルマガID: {params.id}</p>
       <MarkdownRenderer content={dummyContent} />
     </div>
   );

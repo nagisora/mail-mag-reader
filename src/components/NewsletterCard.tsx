@@ -8,10 +8,10 @@ interface NewsletterCardProps {
 
 export default function NewsletterCard({ id, title, createdAt }: NewsletterCardProps) {
   return (
-    <div className="border p-4 mb-4 rounded-lg">
-      <h2 className="text-xl font-bold">{title}</h2>
+    <div className="border border-gray-300 p-4 mb-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white">
+      <h2 className="text-xl font-bold text-gray-800">{title}</h2>
       <p className="text-sm text-gray-500">{new Date(createdAt).toLocaleDateString()}</p>
-      <Link href={`/newsletters/${id}`} className="text-blue-500 hover:underline">
+      <Link href={`/newsletters/${id}`} className="text-blue-600 hover:underline">
         詳細を見る
       </Link>
     </div>

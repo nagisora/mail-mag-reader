@@ -77,7 +77,6 @@ CREATE TABLE reading_progress (
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_public_key
 
-
 ## 6. Supabaseクライアントの初期化
 
 `src/lib/supabase.ts`ファイルを作成し、以下のコードを追加します：
@@ -88,12 +87,28 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-
 これで、アプリケーション内でSupabaseクライアントを使用する準備が整いました。
 
 ## 7. セキュリティ設定
 
 1. Supabaseダッシュボードの「Authentication」→「Policies」に移動します。
 2. 各テーブルに適切なRLSポリシーを設定し、認証されたユーザーのみがデータにアクセスできるようにします。
+
+### RLSポリシーの設定手順
+
+#### `users`テーブルのポリシー設定
+- **ポリシー名**: Allow user registration
+- **アクション**: `INSERT`
+- **条件**: `auth.role() = 'authenticated'`
+
+#### `newsletters`テーブルのポリシー設定
+- **ポリシー名**: Allow read and write for authenticated users
+- **アクション**: `SELECT`, `INSERT`, `UPDATE`, `DELETE`
+- **条件**: `auth.role() = 'authenticated'`
+
+#### `reading_progress`テーブルのポリシー設定
+- **ポリシー名**: Allow read and write for authenticated users
+- **アクション**: `SELECT`, `INSERT`, `UPDATE`, `DELETE`
+- **条件**: `auth.role() = 'authenticated'`
 
 以上の手順でSupabaseのセットアップが完了します。これにより、メルマガリーダーアプリケーションでSupabaseを使用する準備が整いました。

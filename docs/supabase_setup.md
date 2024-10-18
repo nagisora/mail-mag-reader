@@ -112,3 +112,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 - **条件**: `auth.role() = 'authenticated'`
 
 以上の手順でSupabaseのセットアップが完了します。これにより、メルマガリーダーアプリケーションでSupabaseを使用する準備が整いました。
+
+## 8. Supabase CLIのインストール
+
+1. Supabase CLIをインストールします。以下のコマンドを実行してください：
+   ```bash
+   npm install supabase --save-dev
+   ```
+
+2. Supabaseプロジェクトを初期化します：
+   ```bash
+   npx supabase init
+   ```
+
+3. Supabaseスタックを起動します：
+   ```bash
+   npx supabase start
+   ```
+
+これで、ローカル環境でSupabaseを使用する準備が整いました。

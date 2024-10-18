@@ -39,7 +39,7 @@ create policy "Authenticated users can view newsletters" on public.newsletters
   for select using (auth.role() = 'authenticated');
 
 create policy "Authenticated users can insert newsletters" on public.newsletters
-  for insert with check (auth.role() = 'authenticated');
+  for insert with check (auth.uid() is not null); -- 修正: 認証されたユーザーが挿入できるように
 
 create policy "Authenticated users can update newsletters" on public.newsletters
   for update using (auth.role() = 'authenticated');

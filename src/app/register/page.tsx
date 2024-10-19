@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import Link from 'next/link';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -26,7 +25,6 @@ export default function RegisterPage() {
       });
       if (error) throw error;
       if (data.user) {
-        // ユーザーが正常に作成された場合、public.usersテーブルに自動的に追加されます
         alert('確認メールを送信しました。メールを確認して登録を完了してください。');
         router.push('/login');
       } else {
@@ -34,7 +32,7 @@ export default function RegisterPage() {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setError(error.message || 'An error occurred during registration');
+      setError(error instanceof Error ? error.message : 'An error occurred during registration');
     }
   };
 
@@ -46,50 +44,33 @@ export default function RegisterPage() {
           <CardDescription>アカウントを作成してメルマガリーダーを始めましょう</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleRegister}>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-white">
-                  メールアドレス
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-white">
-                  パスワード
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-md py-2 transition duration-200"
-              >
-                登録
-              </Button>
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block mb-1">メールアドレス</label>
+              <Input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
+            <div>
+              <label htmlFor="password" className="block mb-1">パスワード</label>
+              <Input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="text-red-500">{error}</p>}
+            <Button type="submit" className="w-full">
+              登録
+            </Button>
           </form>
         </CardContent>
-        <CardFooter>
-          <p className="text-sm text-center w-full">
-            すでにアカウントをお持ちですか？{' '}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              ログイン
-            </Link>
-          </p>
-        </CardFooter>
       </Card>
     </div>
   );

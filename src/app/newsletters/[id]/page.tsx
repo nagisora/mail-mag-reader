@@ -5,32 +5,42 @@ import ReadingProgressBar from '@/components/ReadingProgressBar';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
-export default function NewsletterDetailPage({ params }: { params: { id: string } }) {
+interface NewsletterDetailPageProps {
+  params: { id: string };
+}
+
+export default function NewsletterDetailPage({ params }: NewsletterDetailPageProps) {
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchNewsletter() {
-      const { data, error } = await supabase
-        .from('newsletters')
-        .select('title, content')
-        .eq('id', params.id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('newsletters')
+          .select('title, content')
+          .eq('id', params.id)
+          .single();
 
-      if (error) {
-        console.error('Error fetching newsletter:', error);
-      } else {
+        if (error) throw error;
+
         setTitle(data.title);
         setContent(data.content);
+      } catch (error) {
+        console.error('Error fetching newsletter:', error);
+        setError(error instanceof Error ? error.message : 'エラーが発生しました。');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     fetchNewsletter();
   }, [params.id]);
 
   if (loading) return <p>Loading...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="container mx-auto px-4 py-6">

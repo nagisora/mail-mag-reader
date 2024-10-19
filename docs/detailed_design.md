@@ -53,7 +53,7 @@
 - GET /api/reading-progress/:newsletter_id
 
 ### 3.4 Gmail取得API (GAS)
-- POST /api/fetch-gmail
+- Google Apps Script (GAS)を使用して、Gmailから特定のラベルを持つメルマガを自動的に取得し、Supabaseに保存します。
 
 ## 4. コンポーネント設計
 
@@ -84,8 +84,7 @@
 1. GASスクリプトが定期的に実行 (例: 1時間ごと)
 2. 特定のラベルが付いたメールを検索
 3. メールの内容をパース
-4. Next.jsアプリのAPIエンドポイントにPOSTリクエスト
-5. 受信したデータをSupabaseに保存
+4. 受信したデータをSupabaseに保存
 
 ## 7. 読み進め位置の保存と復元
 

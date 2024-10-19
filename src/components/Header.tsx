@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +13,7 @@ export default function Header() {
   const closeMenu = () => setIsOpen(false);
 
   return (
-    <header className="bg-primary text-primary-foreground">
+    <header className="bg-background border-b">
       <div className="container py-4 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold">メルマガリーダー</Link>
         <nav className="hidden sm:flex space-x-2">
@@ -22,6 +23,7 @@ export default function Header() {
           <Button asChild variant="ghost">
             <Link href="/profile">プロフィール</Link>
           </Button>
+          <ThemeToggle />
         </nav>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild className="sm:hidden">
@@ -38,6 +40,7 @@ export default function Header() {
               <Button asChild variant="ghost" onClick={closeMenu}>
                 <Link href="/profile">プロフィール</Link>
               </Button>
+              <ThemeToggle />
             </nav>
           </SheetContent>
         </Sheet>

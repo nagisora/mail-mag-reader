@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,6 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    console.log('Supabase client:', supabase);
-    console.log('Supabase auth:', supabase.auth);
-  }, []);
-
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -31,6 +26,7 @@ export default function RegisterPage() {
       });
       if (error) throw error;
       if (data.user) {
+        // ユーザーが正常に作成された場合、public.usersテーブルに自動的に追加されます
         alert('確認メールを送信しました。メールを確認して登録を完了してください。');
         router.push('/login');
       } else {

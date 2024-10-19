@@ -1,57 +1,46 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/mode-toggle";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 
 export default function Header() {
-  const [user, setUser] = useState<any>(null);
-  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
-  };
+  const closeMenu = () => setIsOpen(false);
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-md">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-gray-800 dark:text-white">
-          メルマガリーダー
-        </Link>
-        <nav className="flex items-center space-x-4">
-          {user ? (
-            <>
-              <Link href="/newsletters" className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white">
-                メルマガ一覧
-              </Link>
-              <Button onClick={handleLogout} variant="outline">ログアウト</Button>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white">
-                ログイン
-              </Link>
-              <Link href="/register" className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white">
-                新規登録
-              </Link>
-            </>
-          )}
-          <ModeToggle />
+    <header className="bg-primary text-primary-foreground">
+      <div className="container py-4 flex justify-between items-center">
+        <Link href="/" className="text-2xl font-bold">メルマガリーダー</Link>
+        <nav className="hidden sm:flex space-x-2">
+          <Button asChild variant="ghost">
+            <Link href="/newsletters">メルマガ一覧</Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link href="/profile">プロフィール</Link>
+          </Button>
         </nav>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild className="sm:hidden">
+            <Button variant="ghost" size="icon">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">メニュー</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[240px] sm:hidden">
+            <nav className="flex flex-col space-y-4 mt-8">
+              <Button asChild variant="ghost" onClick={closeMenu}>
+                <Link href="/newsletters">メルマガ一覧</Link>
+              </Button>
+              <Button asChild variant="ghost" onClick={closeMenu}>
+                <Link href="/profile">プロフィール</Link>
+              </Button>
+            </nav>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );

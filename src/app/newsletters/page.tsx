@@ -4,9 +4,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import NewsletterCard from '@/components/NewsletterCard';
 
+interface Newsletter {
+  id: string;
+  title: string;
+  created_at: string;
+}
+
 export default function NewsletterListPage() {
-  const [newsletters, setNewsletters] = useState([]);
-  const [error, setError] = useState(null);
+  const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchNewsletters() {
@@ -20,7 +26,7 @@ export default function NewsletterListPage() {
         setError('エラーが発生しました。');
       } else {
         console.log('Fetched newsletters:', data);
-        setNewsletters(data);
+        setNewsletters(data || []);
       }
     }
 

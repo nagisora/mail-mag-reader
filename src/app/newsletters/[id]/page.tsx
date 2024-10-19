@@ -2,38 +2,33 @@
 
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface NewsletterDetailPageProps {
   params: { id: string };
 }
 
 export default function NewsletterDetailPage({ params }: NewsletterDetailPageProps) {
-  const [content, setContent] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [title, setTitle] = useState<string | null>(null);
+  const [newsletter, setNewsletter] = useState<{ title: string; content: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchNewsletter() {
-      try {
-        const { data, error } = await supabase
-          .from('newsletters')
-          .select('title, content')
-          .eq('id', params.id)
-          .single();
+      const { data, error } = await supabase
+        .from('newsletters')
+        .select('title, content')
+        .eq('id', params.id)
+        .single();
 
-        if (error) throw error;
-
-        setTitle(data.title);
-        setContent(data.content);
-      } catch (error) {
+      if (error) {
         console.error('Error fetching newsletter:', error);
-        setError(error instanceof Error ? error.message : 'エラーが発生しました。');
-      } finally {
-        setLoading(false);
+        setError('メルマガの取得中にエラーが発生しました。');
+      } else {
+        setNewsletter(data);
       }
     }
 
@@ -41,20 +36,46 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   }, [params.id]);
 
   const handleProgressLoaded = (position: number) => {
-    if (contentRef.current) {
-      const scrollPosition = (position / 100) * (document.documentElement.scrollHeight - window.innerHeight);
+    if (position > 0) {
+      const scrollPosition = (position / 100) * document.documentElement.scrollHeight;
       window.scrollTo(0, scrollPosition);
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!newsletter) {
+    return (
+      <Card className="w-full max-w-3xl mx-auto mt-8">
+        <CardHeader>
+          <Skeleton className="h-8 w-3/4" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-2/3" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-6 bg-white dark:bg-gray-900" ref={contentRef}>
+    <div className="container mx-auto px-4 py-8">
       <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
-      <h1 className="text-3xl font-bold mb-4 text-black dark:text-white">{title}</h1>
-      <MarkdownRenderer content={content || ''} />
+      <Card className="w-full max-w-3xl mx-auto">
+        <CardHeader>
+          <CardTitle>{newsletter.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MarkdownRenderer content={newsletter.content} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

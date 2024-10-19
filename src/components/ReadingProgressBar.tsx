@@ -14,18 +14,23 @@ export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: R
   useEffect(() => {
     const fetchProgress = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data, error } = await supabase
-          .from('reading_progress')
-          .select('position')
-          .eq('user_id', user.id)
-          .eq('newsletter_id', newsletterId)
-          .single();
+      if (!user) return;
 
-        if (data && !error) {
-          setProgress(data.position);
-          onProgressLoaded(data.position);
-        }
+      const { data, error } = await supabase
+        .from('reading_progress')
+        .select('position')
+        .eq('user_id', user.id)
+        .eq('newsletter_id', newsletterId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching reading progress:', error);
+        return;
+      }
+
+      if (data) {
+        setProgress(data.position);
+        onProgressLoaded(data.position);
       }
     };
 
@@ -34,36 +39,42 @@ export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: R
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercent = scrollTop / docHeight;
-      setProgress(scrollPercent * 100);
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const newProgress = (scrollPosition / (documentHeight - windowHeight)) * 100;
+      setProgress(newProgress);
     };
 
     window.addEventListener('scroll', handleScroll);
-
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
     const saveProgress = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from('reading_progress').upsert({
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('reading_progress')
+        .upsert({
           user_id: user.id,
           newsletter_id: newsletterId,
-          position: Math.round(progress),
+          position: progress,
+          updated_at: new Date().toISOString(),
         });
+
+      if (error) {
+        console.error('Error saving reading progress:', error);
       }
     };
 
     const debounce = setTimeout(saveProgress, 1000);
-
     return () => clearTimeout(debounce);
   }, [progress, newsletterId]);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200">
+    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
       <div
         className="h-full bg-blue-500 transition-all duration-300 ease-out"
         style={{ width: `${progress}%` }}

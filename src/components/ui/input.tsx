@@ -1,6 +1,8 @@
 import React from 'react';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  // 必要に応じて、ここに追加のプロパティを定義できます
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, ...props }, ref) => (
   <input

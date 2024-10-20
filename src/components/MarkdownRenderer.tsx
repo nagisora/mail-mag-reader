@@ -8,7 +8,7 @@ interface MarkdownRendererProps {
 
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
-    <div className="prose max-w-none text-white"> {/* 色を白に変更 */}
+    <div className="prose prose-lg max-w-none dark:prose-invert">
       <ReactMarkdown>{content}</ReactMarkdown>
     </div>
   );

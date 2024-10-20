@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface ReadingProgressBarProps {
   newsletterId: string;
+  onProgressLoaded: (position: number) => void;
 }
 
-export default function ReadingProgressBar({ newsletterId }: ReadingProgressBarProps) {
+export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: ReadingProgressBarProps) {
   const [progress, setProgress] = useState(0);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -19,73 +19,66 @@ export default function ReadingProgressBar({ newsletterId }: ReadingProgressBarP
       const { data, error } = await supabase
         .from('reading_progress')
         .select('position')
-        .eq('newsletter_id', newsletterId)
         .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('newsletter_id', newsletterId)
+        .single();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching reading progress:', error);
         return;
       }
 
       if (data) {
         setProgress(data.position);
-        window.scrollTo(0, data.position);
+        onProgressLoaded(data.position);
       }
     };
 
     fetchProgress();
-  }, [newsletterId]);
+  }, [newsletterId, onProgressLoaded]);
 
   useEffect(() => {
-    const updateProgress = async () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercent = scrollTop / docHeight;
-      setProgress(scrollPercent * 100);
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const newProgress = (scrollPosition / (documentHeight - windowHeight)) * 100;
+      setProgress(newProgress);
+    };
 
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const saveProgress = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      const { error } = await supabase
+        .from('reading_progress')
+        .upsert({
+          user_id: user.id,
+          newsletter_id: newsletterId,
+          position: progress,
+          updated_at: new Date().toISOString(),
+        });
 
-      timeoutRef.current = setTimeout(async () => {
-        try {
-          const { error } = await supabase
-            .from('reading_progress')
-            .upsert({ 
-              newsletter_id: newsletterId, 
-              user_id: user.id, 
-              position: scrollTop 
-            }, {
-              onConflict: 'user_id,newsletter_id'
-            });
-
-          if (error) throw error;
-        } catch (error) {
-          console.error('Error saving reading progress:', error);
-        }
-      }, 1000);
-    };
-
-    window.addEventListener('scroll', updateProgress);
-
-    return () => {
-      window.removeEventListener('scroll', updateProgress);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (error) {
+        console.error('Error saving reading progress:', error);
       }
     };
-  }, [newsletterId]);
+
+    const debounce = setTimeout(saveProgress, 1000);
+    return () => clearTimeout(debounce);
+  }, [progress, newsletterId]);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200">
+    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
       <div
-        className="h-full bg-blue-500"
+        className="h-full bg-blue-500 transition-all duration-300 ease-out"
         style={{ width: `${progress}%` }}
-      ></div>
+      />
     </div>
   );
 }

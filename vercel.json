@@ -1,0 +1,12 @@
+{
+  "builds": [
+    {
+      "src": "**",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "out"
+      }
+    }
+  ],
+  "ignoreBuildStep": "git rev-parse --abbrev-ref HEAD != main"
+}

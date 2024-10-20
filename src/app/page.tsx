@@ -12,13 +12,13 @@ export default function HomePage() {
         </CardHeader>
         <CardContent>
           <nav className="flex flex-col space-y-4">
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline">
               <Link href="/login">ログイン</Link>
             </Button>
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline">
               <Link href="/register">新規登録</Link>
             </Button>
-            <Button asChild variant="default" className="w-full">
+            <Button asChild variant="default">
               <Link href="/newsletters">メルマガ一覧</Link>
             </Button>
           </nav>

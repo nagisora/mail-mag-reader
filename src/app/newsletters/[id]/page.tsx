@@ -70,14 +70,14 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   return (
     <div className="container mx-auto px-4 py-8">
       <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
-      <Card className="w-full max-w-4xl mx-auto bg-background">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold tracking-tight">{newsletter.title}</CardTitle>
+      <Card className="w-full max-w-4xl mx-auto bg-background sm:border sm:rounded-lg sm:shadow-md">
+        <CardHeader className="space-y-1 sm:px-6 px-0">
+          <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight">{newsletter.title}</CardTitle>
           <p className="text-sm text-muted-foreground">
             公開日: {new Date(newsletter.created_at).toLocaleDateString()}
           </p>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 sm:px-6 px-0">
           <Suspense fallback={<div>Loading content...</div>}>
             <MarkdownRenderer content={newsletter.content} />
           </Suspense>

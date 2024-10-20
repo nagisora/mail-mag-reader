@@ -42,11 +42,23 @@ export function NewsletterVerificationForm({ newsletterId }: NewsletterVerificat
       if (response.ok) {
         if (result.success) {
           setVerificationResult('メルマガの照合に成功しました。');
-          // reading_progressテーブルのis_verifiedを更新
-          const { error } = await supabase
+          
+          // ユーザーIDを取得
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) throw new Error('ユーザーが認証されていません。');
+
+          // reading_progressテーブルを更新または作成
+          const { data, error } = await supabase
             .from('reading_progress')
-            .update({ is_verified: true })
-            .eq('newsletter_id', newsletterId);
+            .upsert({
+              user_id: user.id,
+              newsletter_id: newsletterId,
+              is_verified: true,
+              position: 0, // 初期位置を0に設定
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,newsletter_id'
+            });
 
           if (error) throw error;
 

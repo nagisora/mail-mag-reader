@@ -59,8 +59,8 @@ function saveNewsletter(newsletter) {
     'contentType': 'application/json',
     'payload': JSON.stringify(newsletter),
     'headers': {
-      'Authorization': 'Bearer ' + config.API_KEY,
-      'apikey': config.API_KEY,
+      'Authorization': 'Bearer ' + config.SERVICE_ROLE_KEY,
+      'apikey': config.SERVICE_ROLE_KEY,
       'Prefer': 'return=representation'
     },
     'muteHttpExceptions': true

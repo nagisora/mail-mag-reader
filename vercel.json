@@ -1,13 +1,4 @@
 {
-  "builds": [
-    {
-      "src": "**",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "out"
-      }
-    }
-  ],
   "buildCommand": "next build",
   "outputDirectory": ".next",
   "devCommand": "next dev",

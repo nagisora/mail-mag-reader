@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useUser } from '@/hooks/useUser';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,13 +16,23 @@ interface NewsletterDetailPageProps {
 export default function NewsletterDetailPage({ params }: NewsletterDetailPageProps) {
   const [newsletter, setNewsletter] = useState<{ title: string; content: string; is_verified: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
 
   useEffect(() => {
     async function fetchNewsletter() {
+      if (!user) return;
+
       const { data, error } = await supabase
-        .from('newsletters')
-        .select('title, content, is_verified')
-        .eq('id', params.id)
+        .from('reading_progress')
+        .select(`
+          is_verified,
+          newsletters (
+            title,
+            content
+          )
+        `)
+        .eq('newsletter_id', params.id)
+        .eq('user_id', user.id)
         .single();
 
       if (error) {
@@ -29,15 +40,15 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
         setError('メルマガの取得中にエラーが発生しました。');
       } else if (data) {
         setNewsletter({
-          title: data.title,
-          content: data.content,
-          is_verified: data.is_verified ?? false
+          title: data.newsletters.title,
+          content: data.newsletters.content,
+          is_verified: data.is_verified
         });
       }
     }
 
     fetchNewsletter();
-  }, [params.id]);
+  }, [params.id, user]);
 
   if (error) {
     return (

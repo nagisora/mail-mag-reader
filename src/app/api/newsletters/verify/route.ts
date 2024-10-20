@@ -15,14 +15,13 @@ export async function POST(req: Request) {
 
   // 照合ロジック
   const matchedNewsletter = newsletters.find(newsletter => {
-    // 簡易的な照合ロジック（実際にはより高度なアルゴリズムを使用する）
     const similarity = calculateSimilarity(content, newsletter.content);
     return similarity >= 0.95; // 95%以上の一致
   });
 
   if (matchedNewsletter) {
     // 照合成功時、reading_progressテーブルを更新
-    await supabase
+    const { error: updateError } = await supabase
       .from('reading_progress')
       .upsert({
         user_id: userId,
@@ -31,6 +30,10 @@ export async function POST(req: Request) {
       }, {
         onConflict: 'user_id,newsletter_id'
       });
+
+    if (updateError) {
+      return NextResponse.json({ error: '照合情報の更新に失敗しました' }, { status: 500 });
+    }
 
     return NextResponse.json({ id: matchedNewsletter.id, title: matchedNewsletter.title });
   } else {

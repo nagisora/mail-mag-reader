@@ -26,7 +26,15 @@ export function NewsletterList() {
 
       const { data, error } = await supabase
         .from('reading_progress')
-        .select('newsletter_id, is_verified, newsletters(id, title, created_at)')
+        .select(`
+          newsletter_id,
+          is_verified,
+          newsletters (
+            id,
+            title,
+            created_at
+          )
+        `)
         .eq('user_id', user.id);
 
       if (error) {

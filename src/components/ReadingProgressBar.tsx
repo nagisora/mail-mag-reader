@@ -42,7 +42,7 @@ export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: R
       const scrollPosition = window.scrollY;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-      const newProgress = (scrollPosition / (documentHeight - windowHeight)) * 100;
+      const newProgress = Math.floor((scrollPosition / (documentHeight - windowHeight)) * 100);
       setProgress(newProgress);
     };
 
@@ -55,12 +55,14 @@ export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: R
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const integerProgress = Math.floor(progress);
+
       const { error } = await supabase
         .from('reading_progress')
         .upsert({
           user_id: user.id,
           newsletter_id: newsletterId,
-          position: progress,
+          position: integerProgress,
           updated_at: new Date().toISOString(),
         });
 

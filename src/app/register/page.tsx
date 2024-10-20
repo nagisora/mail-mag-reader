@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
       if (!supabase.auth) {
         throw new Error('Supabase auth is not initialized');
@@ -32,7 +34,15 @@ export default function RegisterPage() {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setError(error instanceof Error ? error.message : 'An error occurred during registration');
+      if (error instanceof Error) {
+        if (error.message.includes('Email address cannot be used')) {
+          setError('このメールアドレスは使用できません。別のメールアドレスをお試しください。');
+        } else {
+          setError(error.message);
+        }
+      } else {
+        setError('登録中にエラーが発生しました。もう一度お試しください。');
+      }
     }
   };
 
@@ -65,7 +75,11 @@ export default function RegisterPage() {
                 required
               />
             </div>
-            {error && <p className="text-red-500">{error}</p>}
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <Button type="submit" className="w-full">
               登録
             </Button>

@@ -11,9 +11,11 @@ function fetchAndSaveNewsletters() {
   // デバッグ用ログを追加
   Logger.log(`Label found: ${label.getName()}`);
   
-  // 未読スレッドを取得
+  // 未読スレッドを取得し、日付が古い順にソート
   const threads = label.getThreads();
-  const unreadThreads = threads.filter(thread => thread.isUnread());
+  const unreadThreads = threads.filter(thread => thread.isUnread()).sort((a, b) => {
+    return a.getLastMessageDate() - b.getLastMessageDate(); // 日付でソート
+  });
   Logger.log(`Found ${unreadThreads.length} unread threads with the label "${config.NEWSLETTER_LABEL}".`);
   
   for (let i = 0; i < unreadThreads.length; i++) {

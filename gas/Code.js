@@ -47,7 +47,7 @@ function saveNewsletter(newsletter) {
   Logger.log("Config for API call: " + JSON.stringify(config, null, 2));
 
   if (!config.API_KEY) {
-    Logger.log('Error: API key is not set. Please run setApiKey() function first.');
+    Logger.log('Error: API key is not set. Please set the service role key in the Config.gs file.');
     return;
   }
 
@@ -68,17 +68,30 @@ function saveNewsletter(newsletter) {
 
   Logger.log(`Request options: ${JSON.stringify(options, null, 2)}`);
 
-  const response = UrlFetchApp.fetch(url, options);
-  const responseCode = response.getResponseCode();
-  const responseBody = response.getContentText();
+  try {
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const responseBody = response.getContentText();
 
-  Logger.log(`Response Code: ${responseCode}`);
-  Logger.log(`Response Body: ${responseBody}`);
+    Logger.log(`Response Code: ${responseCode}`);
+    Logger.log(`Response Body: ${responseBody}`);
 
-  if (responseCode === 201) {
-    Logger.log('Newsletter saved successfully');
-  } else {
-    Logger.log(`Error saving newsletter: ${responseCode} - ${responseBody}`);
+    if (responseCode === 201) {
+      Logger.log('Newsletter saved successfully');
+    } else {
+      Logger.log(`Error saving newsletter: ${responseCode} - ${responseBody}`);
+      try {
+        const errorDetails = JSON.parse(responseBody);
+        Logger.log(`Error details: ${JSON.stringify(errorDetails, null, 2)}`);
+      } catch (parseError) {
+        Logger.log(`Failed to parse error details: ${parseError}`);
+      }
+    }
+  } catch (error) {
+    Logger.log(`Exception occurred: ${error}`);
+    if (error.message) {
+      Logger.log(`Error message: ${error.message}`);
+    }
   }
 }
 

@@ -1,0 +1,7 @@
+npm install -g @google/clasp
+clasp login
+mkdir gas
+cd gas
+clasp clone 1AfPsKOSlbRzxUK4eixr4WO6gSyxIzKr-GlwtMVCmmtR3BGcPTi6gaMCJ
+cd gas
+clasp push

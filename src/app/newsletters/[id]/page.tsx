@@ -27,8 +27,12 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
       if (error) {
         console.error('Error fetching newsletter:', error);
         setError('メルマガの取得中にエラーが発生しました。');
-      } else {
-        setNewsletter(data);
+      } else if (data) {
+        setNewsletter({
+          title: data.title,
+          content: data.content,
+          is_verified: data.is_verified ?? false
+        });
       }
     }
 

@@ -125,7 +125,18 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
    npx supabase init
    ```
 
-3. Supabaseスタックを起動します：
+3. Supabaseプロジェクトにリンクします：
+   ```bash
+   npx supabase link --project-ref <your_project_ref>
+   ```
+   - `<your_project_ref>`は、SupabaseダッシュボードのプロジェクトURLから取得できます。
+
+4. マイグレーションを適用します：
+   ```bash
+   npx supabase db push
+   ```
+
+5. Supabaseスタックを起動します：
    ```bash
    npx supabase start
    ```

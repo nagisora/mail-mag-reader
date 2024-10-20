@@ -1,62 +1,36 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-function calculateSimilarity(str1: string, str2: string): number {
-  const len1 = str1.length;
-  const len2 = str2.length;
-  const matrix = Array(len2 + 1).fill(null).map(() => Array(len1 + 1).fill(0));
+export async function POST(req: Request) {
+  const { content } = await req.json();
 
-  for (let i = 0; i <= len1; i++) {
-    matrix[0][i] = i;
-  }
-  for (let j = 0; j <= len2; j++) {
-    matrix[j][0] = j;
-  }
-
-  for (let j = 1; j <= len2; j++) {
-    for (let i = 1; i <= len1; i++) {
-      if (str1[i - 1] === str2[j - 1]) {
-        matrix[j][i] = matrix[j - 1][i - 1];
-      } else {
-        matrix[j][i] = Math.min(
-          matrix[j - 1][i - 1] + 1,
-          matrix[j][i - 1] + 1,
-          matrix[j - 1][i] + 1
-        );
-      }
-    }
-  }
-
-  const maxLen = Math.max(len1, len2);
-  const similarity = 1 - matrix[len2][len1] / maxLen;
-  return similarity * 100;
-}
-
-export async function POST(request: Request) {
-  const { content } = await request.json();
-
-  if (!content) {
-    return NextResponse.json({ error: 'Content is required' }, { status: 400 });
-  }
-
+  // すべてのメルマガを取得
   const { data: newsletters, error } = await supabase
     .from('newsletters')
-    .select('content')
-    .eq('is_master', true);
+    .select('id, title, content');
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to fetch master newsletters' }, { status: 500 });
+    return NextResponse.json({ error: 'メルマガの取得に失敗しました' }, { status: 500 });
   }
 
-  let maxSimilarity = 0;
-  for (const newsletter of newsletters) {
+  // 照合ロジック
+  const matchedNewsletter = newsletters.find(newsletter => {
+    // 簡易的な照合ロジック（実際にはより高度なアルゴリズムを使用する）
     const similarity = calculateSimilarity(content, newsletter.content);
-    if (similarity > maxSimilarity) {
-      maxSimilarity = similarity;
-    }
+    return similarity >= 0.95; // 95%以上の一致
+  });
+
+  if (matchedNewsletter) {
+    return NextResponse.json({ id: matchedNewsletter.id, title: matchedNewsletter.title });
+  } else {
+    return NextResponse.json({ error: '一致するメルマガが見つかりませんでした' }, { status: 404 });
   }
+}
 
-  const match = maxSimilarity >= 95;
-
-  return NextResponse.json({ match, similarity: maxSimilarity });
+// 簡易的な類似度計算関数（実際にはより高度なアルゴリズムを使用する）
+function calculateSimilarity(text1: string, text2: string): number {
+  const words1 = text1.toLowerCase().split(/\s+/);
+  const words2 = text2.toLowerCase().split(/\s+/);
+  const intersection = words1.filter(word => words2.includes(word));
+  return intersection.length / Math.max(words1.length, words2.length);
 }

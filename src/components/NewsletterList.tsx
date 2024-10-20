@@ -10,6 +10,7 @@ interface Newsletter {
   id: string;
   title: string;
   created_at: string;
+  is_verified: boolean;
 }
 
 export function NewsletterList() {
@@ -56,6 +57,7 @@ export function NewsletterList() {
           id={newsletter.id}
           title={newsletter.title}
           createdAt={newsletter.created_at}
+          isVerified={newsletter.is_verified}
         />
       ))}
     </div>

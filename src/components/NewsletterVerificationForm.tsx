@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export default function NewsletterVerificationForm() {
+export function NewsletterVerificationForm() {
   const [content, setContent] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<string | null>(null);
@@ -24,15 +24,14 @@ export default function NewsletterVerificationForm() {
         body: JSON.stringify({ content }),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        setVerificationResult(data.match ? '照合成功：メルマガの閲覧が許可されました。' : '照合失敗：一致度が95%未満です。');
+        const result = await response.json();
+        setVerificationResult(`メルマガが見つかりました: ${result.title}`);
       } else {
-        setVerificationResult('エラー：' + data.error);
+        setVerificationResult('一致するメルマガが見つかりませんでした。');
       }
     } catch (error) {
-      setVerificationResult('エラー：照合処理中に問題が発生しました。');
+      setVerificationResult('エラーが発生しました。もう一度お試しください。');
     } finally {
       setIsVerifying(false);
     }
@@ -44,14 +43,13 @@ export default function NewsletterVerificationForm() {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="メルマガの本文を入力してください"
-        className="h-40"
-        required
+        rows={10}
       />
       <Button type="submit" disabled={isVerifying}>
         {isVerifying ? '照合中...' : 'メルマガを照合'}
       </Button>
       {verificationResult && (
-        <Alert variant={verificationResult.startsWith('照合成功') ? 'default' : 'destructive'}>
+        <Alert>
           <AlertDescription>{verificationResult}</AlertDescription>
         </Alert>
       )}

@@ -21,6 +21,7 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    @apply text-base leading-relaxed;
   }
 }
 
@@ -28,6 +29,24 @@ body {
 @layer components {
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  .prose {
+    @apply text-foreground;
+  }
+  .prose p {
+    @apply mb-4;
+  }
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    @apply text-foreground font-bold mt-8 mb-4;
+  }
+  .prose a {
+    @apply text-blue-600 hover:underline;
+  }
+  .prose ul, .prose ol {
+    @apply pl-6 mb-4;
+  }
+  .prose li {
+    @apply mb-2;
   }
 }
 

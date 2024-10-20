@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { remark } from 'remark';
+import strip from 'strip-markdown';
 
 export async function POST(req: Request) {
   try {
@@ -25,8 +27,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '指定されたメルマガが見つかりません' }, { status: 404 });
     }
 
+    // Markdownをプレーンテキストに変換
+    const plainTextContent = await markdownToPlainText(newsletter.content);
+
     // コンテンツの照合
-    const similarity = calculateSimilarity(newsletter.content, content);
+    const similarity = calculateSimilarity(plainTextContent, content);
 
     if (similarity >= 0.80) {
       // 照合成功
@@ -39,6 +44,13 @@ export async function POST(req: Request) {
     console.error('Error verifying newsletter:', error);
     return NextResponse.json({ error: 'メルマガの照合中にエラーが発生しました' }, { status: 500 });
   }
+}
+
+async function markdownToPlainText(markdown: string): Promise<string> {
+  const result = await remark()
+    .use(strip)
+    .process(markdown);
+  return result.toString();
 }
 
 function calculateSimilarity(str1: string, str2: string): number {

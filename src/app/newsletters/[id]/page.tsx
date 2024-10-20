@@ -70,7 +70,7 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   return (
     <div className="container mx-auto px-4 py-8">
       <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
-      <Card className="w-full max-w-4xl mx-auto bg-background sm:border sm:rounded-lg sm:shadow-md">
+      <Card className="w-full max-w-4xl mx-auto bg-background border-0 sm:border sm:rounded-lg sm:shadow-md">
         <CardHeader className="space-y-1 sm:px-6 px-0">
           <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight">{newsletter.title}</CardTitle>
           <p className="text-sm text-muted-foreground">

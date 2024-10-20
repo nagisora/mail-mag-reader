@@ -18,6 +18,12 @@ function fetchAndSaveNewsletters() {
   
   for (let i = 0; i < unreadThreads.length; i++) {
     const messages = unreadThreads[i].getMessages();
+    Logger.log(`Messages in thread ${i + 1}:`);
+    for (const message of messages) {
+      Logger.log(`- Subject: ${message.getSubject()}`);
+      Logger.log(`- Body (HTML): ${message.getBody()}`); // HTMLフォーマットの本文を取得
+    }
+
     Logger.log(`Processing thread ${i + 1} of ${unreadThreads.length} with ${messages.length} messages.`);
     for (let j = 0; j < messages.length; j++) {
       const message = messages[j];

@@ -7,6 +7,5 @@
         "distDir": "out"
       }
     }
-  ],
-  "ignoreBuildStep": "git rev-parse --abbrev-ref HEAD != main"
+  ]
 }

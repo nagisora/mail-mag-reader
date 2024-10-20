@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -33,6 +33,7 @@ export default function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-[240px] sm:hidden">
+            <SheetTitle>メニュー</SheetTitle>
             <nav className="flex flex-col space-y-4 mt-8">
               <Button asChild variant="ghost" onClick={closeMenu}>
                 <Link href="/newsletters">メルマガ一覧</Link>

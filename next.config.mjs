@@ -12,6 +12,14 @@ const nextConfig = {
     // ビルド時のESLintチェックをスキップ（必要に応じて）
     ignoreDuringBuilds: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/:path*',
+        destination: `/:path*?maintenance_mode=${process.env.MAINTENANCE_MODE || 'false'}`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

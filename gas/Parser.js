@@ -31,7 +31,7 @@ function convertHtmlToMarkdown(html) {
   
   // HTMLを整形するための処理を追加
   html = html.replace(/<\s*br\s*\/?>/gi, '\n'); // <br>タグを改行に変換
-  html = html.replace(/<\/p>/gi, '</p>\n\n'); // 段落の後に2つの改行を追加
+  html = html.replace(/<\/p>/gi, '</p>\n\n'); // ���落の後に2つの改行を追加
   html = html.replace(/<\/?[^>]+(\/?)>/g, function (match) {
     return match.toLowerCase(); // タグを小文字に変換
   });
@@ -47,6 +47,13 @@ function convertHtmlToMarkdown(html) {
   // リンクの変換
   markdown = markdown.replace(/<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)');
   
+  // 画像の変換
+  markdown = markdown.replace(/<img\s+[^>]*src="([^"]*)"[^>]*\/?>/gi, '![]($1)'); // 画像をMarkdown形式に変換
+  
+  // コードブロックの変換
+  markdown = markdown.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/gi, '```\n$1\n```'); // コードブロックをMarkdown形式に変換
+  markdown = markdown.replace(/<code>(.*?)<\/code>/gi, '`$1`'); // インラインコードをMarkdown形式に変換
+  
   // 強調の変換
   markdown = markdown.replace(/<(strong|b)>(.*?)<\/\1>/gi, '**$2**');
   markdown = markdown.replace(/<(em|i)>(.*?)<\/\1>/gi, '*$2*');
@@ -54,6 +61,11 @@ function convertHtmlToMarkdown(html) {
   // リストの変換
   markdown = markdown.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, function(match, content) {
     return content.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '- $1\n');
+  });
+  
+  // 順序付きリストの変換
+  markdown = markdown.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, function(match, content) {
+    return content.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '1. $1\n');
   });
   
   // 残りのHTMLタグを削除

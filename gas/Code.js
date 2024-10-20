@@ -21,7 +21,7 @@ function fetchAndSaveNewsletters() {
     Logger.log(`Messages in thread ${i + 1}:`);
     for (const message of messages) {
       Logger.log(`- Subject: ${message.getSubject()}`);
-      Logger.log(`- Body (HTML): ${message.getBody()}`); // HTMLフォーマットの本文を取得
+      Logger.log(`- Body (HTML): ${message.getBody().substring(0, 200)}...`); // HTMLの最初の200文字のみを表示
     }
 
     Logger.log(`Processing thread ${i + 1} of ${unreadThreads.length} with ${messages.length} messages.`);

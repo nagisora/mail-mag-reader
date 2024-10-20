@@ -1,5 +1,7 @@
 "use client"; // 追加
 
+import dynamic from 'next/dynamic'
+import { Suspense } from 'react';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import { useEffect, useState } from 'react';
@@ -68,12 +70,17 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   return (
     <div className="container mx-auto px-4 py-8">
       <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
-      <Card className="w-full max-w-3xl mx-auto">
-        <CardHeader>
-          <CardTitle>{newsletter.title}</CardTitle>
+      <Card className="w-full max-w-4xl mx-auto bg-background">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-3xl font-bold tracking-tight">{newsletter.title}</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            公開日: {new Date(newsletter.created_at).toLocaleDateString()}
+          </p>
         </CardHeader>
-        <CardContent>
-          <MarkdownRenderer content={newsletter.content} />
+        <CardContent className="pt-6">
+          <Suspense fallback={<div>Loading content...</div>}>
+            <MarkdownRenderer content={newsletter.content} />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

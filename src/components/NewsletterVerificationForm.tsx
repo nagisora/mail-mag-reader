@@ -4,8 +4,13 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from '@/lib/supabase';
 
-export function NewsletterVerificationForm() {
+interface NewsletterVerificationFormProps {
+  newsletterId: string;
+}
+
+export function NewsletterVerificationForm({ newsletterId }: NewsletterVerificationFormProps) {
   const [content, setContent] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<string | null>(null);
@@ -21,14 +26,21 @@ export function NewsletterVerificationForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ id: newsletterId, content }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        setVerificationResult(`メルマガが見つかりました: ${result.title}`);
+        setVerificationResult('メルマガの照合に成功しました。');
+        // メルマガのis_verifiedステータスを更新
+        await supabase
+          .from('newsletters')
+          .update({ is_verified: true })
+          .eq('id', newsletterId);
+        // ページをリロードして更新されたコンテンツを表示
+        window.location.reload();
       } else {
-        setVerificationResult('一致するメルマガが見つかりませんでした。');
+        setVerificationResult('メルマガの照合に失敗しました。');
       }
     } catch (error) {
       setVerificationResult('エラーが発生しました。もう一度お試しください。');

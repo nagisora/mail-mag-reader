@@ -29,20 +29,25 @@ export function NewsletterVerificationForm({ newsletterId }: NewsletterVerificat
         body: JSON.stringify({ id: newsletterId, content }),
       });
 
+      const result = await response.json();
+
       if (response.ok) {
-        const result = await response.json();
         setVerificationResult('メルマガの照合に成功しました。');
-        // メルマガのis_verifiedステータスを更新
-        await supabase
-          .from('newsletters')
+        // reading_progressテーブルのis_verifiedを更新
+        const { error } = await supabase
+          .from('reading_progress')
           .update({ is_verified: true })
-          .eq('id', newsletterId);
+          .eq('newsletter_id', newsletterId);
+
+        if (error) throw error;
+
         // ページをリロードして更新されたコンテンツを表示
         window.location.reload();
       } else {
-        setVerificationResult('メルマガの照合に失敗しました。');
+        setVerificationResult(result.error || 'メルマガの照合に失敗しました。');
       }
     } catch (error) {
+      console.error('Error verifying newsletter:', error);
       setVerificationResult('エラーが発生しました。もう一度お試しください。');
     } finally {
       setIsVerifying(false);

@@ -18,7 +18,10 @@ export default function NewsletterCard({ id, title, createdAt, isVerified }: New
         <h2 className="text-xl font-bold text-gray-800 hover:text-blue-600 cursor-pointer">{title}</h2>
       </Link>
       <p className="text-sm text-gray-500">{new Date(createdAt).toLocaleDateString()}</p>
-      <Badge variant={isVerified ? "success" : "secondary"} className="mt-2">
+      <Badge 
+        variant={isVerified ? "success" : "destructive"} 
+        className={`mt-2 text-white ${isVerified ? 'bg-green-600 dark:bg-green-800' : 'bg-red-600 dark:bg-red-800'}`}
+      >
         {isVerified ? '照合済み' : '未照合'}
       </Badge>
     </div>

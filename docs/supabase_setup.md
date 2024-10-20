@@ -136,7 +136,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
    npx supabase db push
    ```
 
-5. Supabaseスタックを起動します：
+5. リモートDBのリセットとマイグレーションを行うには、以下のコマンドを実行します：
+   ```bash
+   npx supabase db reset --linked
+   ```
+   - このコマンドは、リンクされたリモートデータベースをリセットし、マイグレーションを適用します。
+
+6. Supabaseスタックを起動します（ローカルでデータベースを操作する場合）：
    ```bash
    npx supabase start
    ```

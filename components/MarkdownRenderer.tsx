@@ -9,6 +9,15 @@ interface MarkdownRendererProps {
 }
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
+  // URLを検出してMarkdownのリンク形式に変換する関数
+  const convertUrlsToLinks = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, (url) => `[${url}](${url})`);
+  };
+
+  // コンテンツ全体のURLをリンクに変換
+  const contentWithLinks = convertUrlsToLinks(content);
+
   return (
     <ReactMarkdown
       components={{
@@ -22,10 +31,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
           <Typography variant="h4" className="text-2xl font-semibold mt-4 mb-2" {...props} />
         ),
         p: ({ node, ...props }) => (
-          <Typography variant="p" className="mt-2 mb-4" {...props} />
+          <Typography variant="p" className="mt-2 mb-4">
+            {React.Children.map(props.children, child => {
+              if (typeof child === 'string') {
+                return <span dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(child) }} />;
+              }
+              return child;
+            })}
+          </Typography>
         ),
-        a: ({ node, ...props }) => (
-          <a className="text-blue-600 hover:underline" {...props} />
+        a: ({ node, href, children, ...props }) => (
+          <a href={href} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer" {...props}>
+            {children}
+          </a>
         ),
         code: ({ node, inline, className, children, ...props }) => {
           const match = /language-(\w+)/.exec(className || '');
@@ -46,7 +64,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
         },
       }}
     >
-      {content}
+      {contentWithLinks}
     </ReactMarkdown>
   );
 };

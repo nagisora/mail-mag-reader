@@ -1,0 +1,6 @@
+/* src/components/markdownStyles.css */
+.markdown-content {
+    overflow-wrap: break-word; /* URLを折り返す */
+    word-wrap: break-word; /* 古いブラウザのためのフォールバック */
+    word-break: break-all; /* 単語の途中で折り返す */
+}

@@ -24,36 +24,41 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
     async function fetchNewsletter() {
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('reading_progress')
-        .select(`
-          is_verified,
-          position,
-          newsletters (
-            title,
-            content
-          )
-        `)
-        .eq('newsletter_id', params.id)
-        .eq('user_id', user.id)
+      const { data: newsletterData, error: newsletterError } = await supabase
+        .from('newsletters')
+        .select('title, content')
+        .eq('id', params.id)
         .single();
 
-      if (error) {
-        console.error('Error fetching newsletter:', error);
+      if (newsletterError) {
+        console.error('Error fetching newsletter:', newsletterError);
         setError('メルマガの取得中にエラーが発生しました。');
-      } else if (data) {
-        setNewsletter({
-          title: data.newsletters.title,
-          content: data.newsletters.content,
-          is_verified: data.is_verified
-        });
-        // 保存された位置にスクロール
-        if (data.position && contentRef.current) {
-          setTimeout(() => {
-            const scrollPosition = (data.position / 100) * document.documentElement.scrollHeight;
-            window.scrollTo(0, scrollPosition);
-          }, 100);
-        }
+        return;
+      }
+
+      const { data: progressData, error: progressError } = await supabase
+        .from('reading_progress')
+        .select('is_verified, position')
+        .eq('newsletter_id', params.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (progressError) {
+        console.error('Error fetching reading progress:', progressError);
+      }
+
+      setNewsletter({
+        title: newsletterData.title,
+        content: newsletterData.content,
+        is_verified: progressData?.is_verified ?? false
+      });
+
+      // 保存された位置にスクロール
+      if (progressData?.position && contentRef.current) {
+        setTimeout(() => {
+          const scrollPosition = (progressData.position / 100) * document.documentElement.scrollHeight;
+          window.scrollTo(0, scrollPosition);
+        }, 100);
       }
     }
 

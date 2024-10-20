@@ -25,29 +25,28 @@ export function NewsletterList() {
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('reading_progress')
+        .from('newsletters')
         .select(`
-          newsletter_id,
-          is_verified,
-          newsletters (
-            id,
-            title,
-            created_at
+          id,
+          title,
+          created_at,
+          reading_progress!left (
+            is_verified
           )
         `)
-        .eq('user_id', user.id);
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching newsletters:', error);
         setError('メルマガの取得中にエラーが発生しました。');
       } else {
-        const newsletters = data?.map(item => ({
-          id: item.newsletters.id,
-          title: item.newsletters.title,
-          created_at: item.newsletters.created_at,
-          is_verified: item.is_verified
+        const newsletters = data.map(item => ({
+          id: item.id,
+          title: item.title,
+          created_at: item.created_at,
+          is_verified: item.reading_progress?.[0]?.is_verified ?? false
         }));
-        setNewsletters(newsletters || []);
+        setNewsletters(newsletters);
       }
     }
 

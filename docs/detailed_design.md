@@ -30,10 +30,10 @@
 - is_master: boolean (マスターメルマガかどうかを示すフラグ)
 
 ### 2.3 読み進め位置テーブル (reading_progress)
-- id: uuid (primary key)
 - user_id: uuid (foreign key to users.id)
 - newsletter_id: uuid (foreign key to newsletters.id)
 - position: integer
+- is_verified: boolean (ユーザーがこのメルマガを照合済みかどうかを示すフラグ)
 - updated_at: timestamp
 
 ## 3. API設計

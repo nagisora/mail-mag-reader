@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
-  const { content } = await req.json();
+  const { content, userId } = await req.json();
 
   // すべてのメルマガを取得
   const { data: newsletters, error } = await supabase
@@ -21,6 +21,17 @@ export async function POST(req: Request) {
   });
 
   if (matchedNewsletter) {
+    // 照合成功時、reading_progressテーブルを更新
+    await supabase
+      .from('reading_progress')
+      .upsert({
+        user_id: userId,
+        newsletter_id: matchedNewsletter.id,
+        is_verified: true
+      }, {
+        onConflict: 'user_id,newsletter_id'
+      });
+
     return NextResponse.json({ id: matchedNewsletter.id, title: matchedNewsletter.title });
   } else {
     return NextResponse.json({ error: '一致するメルマガが見つかりませんでした' }, { status: 404 });

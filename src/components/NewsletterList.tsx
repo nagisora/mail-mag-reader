@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase';
 import NewsletterCard from '@/components/NewsletterCard';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useUser } from '@/hooks/useUser';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Newsletter {
   id: string;
@@ -16,24 +18,49 @@ interface Newsletter {
 export function NewsletterList() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { user, loading } = useUser();
 
   useEffect(() => {
     async function fetchNewsletters() {
+      if (!user) return;
+
       const { data, error } = await supabase
-        .from('newsletters')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from('reading_progress')
+        .select('newsletter_id, is_verified, newsletters(id, title, created_at)')
+        .eq('user_id', user.id);
 
       if (error) {
         console.error('Error fetching newsletters:', error);
         setError('メルマガの取得中にエラーが発生しました。');
       } else {
-        setNewsletters(data || []);
+        const newsletters = data?.map(item => ({
+          id: item.newsletters.id,
+          title: item.newsletters.title,
+          created_at: item.newsletters.created_at,
+          is_verified: item.is_verified
+        }));
+        setNewsletters(newsletters || []);
       }
     }
 
-    fetchNewsletters();
-  }, []);
+    if (user) {
+      fetchNewsletters();
+    }
+  }, [user]);
+
+  if (loading) {
+    return <Skeleton className="w-full h-24" />;
+  }
+
+  if (!user) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>エラー</AlertTitle>
+        <AlertDescription>ユーザーが認証されていません。ログインしてください。</AlertDescription>
+      </Alert>
+    );
+  }
 
   if (error) {
     return (

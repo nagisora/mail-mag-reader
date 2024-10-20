@@ -14,11 +14,19 @@ export function NewsletterVerificationForm({ newsletterId }: NewsletterVerificat
   const [content, setContent] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsVerifying(true);
     setVerificationResult(null);
+    setError(null);
+
+    if (!content.trim()) {
+      setError('メルマガの本文を入力してください。');
+      setIsVerifying(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/newsletters/verify', {
@@ -32,23 +40,27 @@ export function NewsletterVerificationForm({ newsletterId }: NewsletterVerificat
       const result = await response.json();
 
       if (response.ok) {
-        setVerificationResult('メルマガの照合に成功しました。');
-        // reading_progressテーブルのis_verifiedを更新
-        const { error } = await supabase
-          .from('reading_progress')
-          .update({ is_verified: true })
-          .eq('newsletter_id', newsletterId);
+        if (result.success) {
+          setVerificationResult('メルマガの照合に成功しました。');
+          // reading_progressテーブルのis_verifiedを更新
+          const { error } = await supabase
+            .from('reading_progress')
+            .update({ is_verified: true })
+            .eq('newsletter_id', newsletterId);
 
-        if (error) throw error;
+          if (error) throw error;
 
-        // ページをリロードして更新されたコンテンツを表示
-        window.location.reload();
+          // ページをリロードして更新されたコンテンツを表示
+          window.location.reload();
+        } else {
+          setError(`メルマガの照合に失敗しました。類似度: ${result.similarity}`);
+        }
       } else {
-        setVerificationResult(result.error || 'メルマガの照合に失敗しました。');
+        setError(result.error || 'メルマガの照合中にエラーが発生しました。');
       }
     } catch (error) {
       console.error('Error verifying newsletter:', error);
-      setVerificationResult('エラーが発生しました。もう一度お試しください。');
+      setError('エラーが発生しました。もう一度お試しください。');
     } finally {
       setIsVerifying(false);
     }
@@ -61,10 +73,16 @@ export function NewsletterVerificationForm({ newsletterId }: NewsletterVerificat
         onChange={(e) => setContent(e.target.value)}
         placeholder="メルマガの本文を入力してください"
         rows={10}
+        required
       />
-      <Button type="submit" disabled={isVerifying}>
+      <Button type="submit" disabled={isVerifying || !content.trim()}>
         {isVerifying ? '照合中...' : 'メルマガを照合'}
       </Button>
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       {verificationResult && (
         <Alert>
           <AlertDescription>{verificationResult}</AlertDescription>

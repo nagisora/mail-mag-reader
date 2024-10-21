@@ -46,7 +46,15 @@ export function NewsletterList() {
           created_at: item.created_at,
           is_verified: item.reading_progress?.[0]?.is_verified ?? false
         }));
-        setNewsletters(newsletters);
+
+        // 照合済みのメルマガを先頭に持ってくる
+        const sortedNewsletters = newsletters.sort((a, b) => {
+          if (a.is_verified && !b.is_verified) return -1;
+          if (!a.is_verified && b.is_verified) return 1;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+
+        setNewsletters(sortedNewsletters);
       }
     }
 

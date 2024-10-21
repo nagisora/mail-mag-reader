@@ -18,6 +18,49 @@ export default function LoginPage() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+
+      // ユーザー情報を取得
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // ユーザーの is_first_login フラグを確認
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('is_first_login')
+          .eq('id', user.id)
+          .single();
+
+        if (userError) {
+          console.error('Error fetching user data:', userError);
+        } else if (userData && userData.is_first_login) {
+          // 初回ログイン時の処理
+          const { error: progressError } = await supabase
+            .from('reading_progress')
+            .upsert({
+              user_id: user.id,
+              newsletter_id: 'b1fc1499-7388-441e-a3c5-1de7f31b3c0b',
+              position: 0,
+              is_verified: true,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,newsletter_id'
+            });
+
+          if (progressError) {
+            console.error('Error creating reading progress:', progressError);
+          } else {
+            // is_first_login フラグを更新
+            const { error: updateError } = await supabase
+              .from('users')
+              .update({ is_first_login: false })
+              .eq('id', user.id);
+
+            if (updateError) {
+              console.error('Error updating is_first_login flag:', updateError);
+            }
+          }
+        }
+      }
+
       router.push('/newsletters');
     } catch (error) {
       console.error('Error logging in:', error);

@@ -1,44 +1,72 @@
 "use client"; // 追加
 
-import dynamic from 'next/dynamic'
-import { Suspense } from 'react';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
-import ReadingProgressBar from '@/components/ReadingProgressBar';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useUser } from '@/hooks/useUser';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { NewsletterVerificationForm } from '@/components/NewsletterVerificationForm';
+import ReadingProgressBar from '@/components/ReadingProgressBar';
 
 interface NewsletterDetailPageProps {
   params: { id: string };
 }
 
 export default function NewsletterDetailPage({ params }: NewsletterDetailPageProps) {
-  const [newsletter, setNewsletter] = useState<{ title: string; content: string } | null>(null);
+  const [newsletter, setNewsletter] = useState<{ title: string; content: string; is_verified: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchNewsletter() {
-      const { data, error } = await supabase
+      if (!user) return;
+
+      const { data: newsletterData, error: newsletterError } = await supabase
         .from('newsletters')
         .select('title, content')
         .eq('id', params.id)
         .single();
 
-      if (error) {
-        console.error('Error fetching newsletter:', error);
+      if (newsletterError) {
+        console.error('Error fetching newsletter:', newsletterError);
         setError('メルマガの取得中にエラーが発生しました。');
-      } else {
-        setNewsletter(data);
+        return;
+      }
+
+      const { data: progressData, error: progressError } = await supabase
+        .from('reading_progress')
+        .select('is_verified, position')
+        .eq('newsletter_id', params.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (progressError) {
+        console.error('Error fetching reading progress:', progressError);
+      }
+
+      setNewsletter({
+        title: newsletterData.title,
+        content: newsletterData.content,
+        is_verified: progressData?.is_verified ?? false
+      });
+
+      // 保存された位置にスクロール
+      if (progressData?.position && contentRef.current) {
+        setTimeout(() => {
+          const scrollPosition = (progressData.position / 100) * document.documentElement.scrollHeight;
+          window.scrollTo(0, scrollPosition);
+        }, 100);
       }
     }
 
     fetchNewsletter();
-  }, [params.id]);
+  }, [params.id, user]);
 
   const handleProgressLoaded = (position: number) => {
-    if (position > 0) {
+    if (contentRef.current) {
       const scrollPosition = (position / 100) * document.documentElement.scrollHeight;
       window.scrollTo(0, scrollPosition);
     }
@@ -69,18 +97,19 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
+      {newsletter && newsletter.is_verified && (
+        <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
+      )}
       <Card className="w-full max-w-4xl mx-auto bg-background border-0 sm:border-0 rounded-none sm:rounded-lg shadow-none sm:shadow-sm">
         <CardHeader className="space-y-1 sm:px-6 px-0">
           <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight">{newsletter.title}</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            公開日: {new Date(newsletter.created_at).toLocaleDateString()}
-          </p>
         </CardHeader>
-        <CardContent className="pt-6 sm:px-6 px-0">
-          <Suspense fallback={<div>Loading content...</div>}>
+        <CardContent className="pt-6 sm:px-6 px-0" ref={contentRef}>
+          {newsletter.is_verified ? (
             <MarkdownRenderer content={newsletter.content} />
-          </Suspense>
+          ) : (
+            <NewsletterVerificationForm newsletterId={params.id} />
+          )}
         </CardContent>
       </Card>
     </div>

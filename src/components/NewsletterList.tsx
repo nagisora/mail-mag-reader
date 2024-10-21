@@ -5,34 +5,77 @@ import { supabase } from '@/lib/supabase';
 import NewsletterCard from '@/components/NewsletterCard';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useUser } from '@/hooks/useUser';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Newsletter {
   id: string;
   title: string;
   created_at: string;
+  is_verified: boolean;
 }
 
 export function NewsletterList() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { user, loading } = useUser();
 
   useEffect(() => {
     async function fetchNewsletters() {
+      if (!user) return;
+
       const { data, error } = await supabase
         .from('newsletters')
-        .select('*')
+        .select(`
+          id,
+          title,
+          created_at,
+          reading_progress!left (
+            is_verified
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching newsletters:', error);
         setError('メルマガの取得中にエラーが発生しました。');
       } else {
-        setNewsletters(data || []);
+        const newsletters = data.map(item => ({
+          id: item.id,
+          title: item.title,
+          created_at: item.created_at,
+          is_verified: item.reading_progress?.[0]?.is_verified ?? false
+        }));
+
+        // 照合済みのメルマガを先頭に持ってくる
+        const sortedNewsletters = newsletters.sort((a, b) => {
+          if (a.is_verified && !b.is_verified) return -1;
+          if (!a.is_verified && b.is_verified) return 1;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+
+        setNewsletters(sortedNewsletters);
       }
     }
 
-    fetchNewsletters();
-  }, []);
+    if (user) {
+      fetchNewsletters();
+    }
+  }, [user]);
+
+  if (loading) {
+    return <Skeleton className="w-full h-24" />;
+  }
+
+  if (!user) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>エラー</AlertTitle>
+        <AlertDescription>ユーザーが認証されていません。ログインしてください。</AlertDescription>
+      </Alert>
+    );
+  }
 
   if (error) {
     return (
@@ -56,6 +99,7 @@ export function NewsletterList() {
           id={newsletter.id}
           title={newsletter.title}
           createdAt={newsletter.created_at}
+          isVerified={newsletter.is_verified}
         />
       ))}
     </div>

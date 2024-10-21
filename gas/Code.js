@@ -11,9 +11,11 @@ function fetchAndSaveNewsletters() {
   // デバッグ用ログを追加
   Logger.log(`Label found: ${label.getName()}`);
   
-  // 未読スレッドを取得
+  // 未読スレッドを取得し、日付が古い順にソート
   const threads = label.getThreads();
-  const unreadThreads = threads.filter(thread => thread.isUnread());
+  const unreadThreads = threads.filter(thread => thread.isUnread()).sort((a, b) => {
+    return a.getLastMessageDate() - b.getLastMessageDate(); // 日付でソート
+  });
   Logger.log(`Found ${unreadThreads.length} unread threads with the label "${config.NEWSLETTER_LABEL}".`);
   
   for (let i = 0; i < unreadThreads.length; i++) {
@@ -47,7 +49,7 @@ function saveNewsletter(newsletter) {
   Logger.log("Config for API call: " + JSON.stringify(config, null, 2));
 
   if (!config.API_KEY) {
-    Logger.log('Error: API key is not set. Please run setApiKey() function first.');
+    Logger.log('Error: API key is not set. Please set the service role key in the Config.gs file.');
     return;
   }
 
@@ -59,8 +61,8 @@ function saveNewsletter(newsletter) {
     'contentType': 'application/json',
     'payload': JSON.stringify(newsletter),
     'headers': {
-      'Authorization': 'Bearer ' + config.API_KEY,
-      'apikey': config.API_KEY,
+      'Authorization': 'Bearer ' + config.SERVICE_ROLE_KEY,
+      'apikey': config.SERVICE_ROLE_KEY,
       'Prefer': 'return=representation'
     },
     'muteHttpExceptions': true
@@ -68,17 +70,30 @@ function saveNewsletter(newsletter) {
 
   Logger.log(`Request options: ${JSON.stringify(options, null, 2)}`);
 
-  const response = UrlFetchApp.fetch(url, options);
-  const responseCode = response.getResponseCode();
-  const responseBody = response.getContentText();
+  try {
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const responseBody = response.getContentText();
 
-  Logger.log(`Response Code: ${responseCode}`);
-  Logger.log(`Response Body: ${responseBody}`);
+    Logger.log(`Response Code: ${responseCode}`);
+    Logger.log(`Response Body: ${responseBody}`);
 
-  if (responseCode === 201) {
-    Logger.log('Newsletter saved successfully');
-  } else {
-    Logger.log(`Error saving newsletter: ${responseCode} - ${responseBody}`);
+    if (responseCode === 201) {
+      Logger.log('Newsletter saved successfully');
+    } else {
+      Logger.log(`Error saving newsletter: ${responseCode} - ${responseBody}`);
+      try {
+        const errorDetails = JSON.parse(responseBody);
+        Logger.log(`Error details: ${JSON.stringify(errorDetails, null, 2)}`);
+      } catch (parseError) {
+        Logger.log(`Failed to parse error details: ${parseError}`);
+      }
+    }
+  } catch (error) {
+    Logger.log(`Exception occurred: ${error}`);
+    if (error.message) {
+      Logger.log(`Error message: ${error.message}`);
+    }
   }
 }
 

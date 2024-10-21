@@ -18,9 +18,6 @@ export default function HomePage() {
             <Button asChild variant="outline">
               <Link href="/register">新規登録</Link>
             </Button>
-            <Button asChild variant="default">
-              <Link href="/newsletters">メルマガ一覧</Link>
-            </Button>
           </nav>
         </CardContent>
       </Card>

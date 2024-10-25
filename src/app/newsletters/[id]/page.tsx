@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import Link from 'next/link';
 import { ThemeToggle } from "@/components/theme-toggle";
+import Header from '@/components/Header';
 
 interface NewsletterDetailPageProps {
   params: { id: string };
@@ -44,7 +45,7 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
 
       if (newsletterError) {
         console.error('Error fetching newsletter:', newsletterError);
-        setError('メルマガの取得中にエラーが発生しました。');
+        setError('メマガの取得中にエラーが発生しました。');
         return;
       }
 
@@ -132,53 +133,16 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-10 bg-background border-b">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between py-2">
-            {/* 左側のハンバーガーメニュー */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">メニューを開く</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[240px]">
-                <nav className="flex flex-col space-y-4 mt-8">
-                  <Button asChild variant="ghost">
-                    <Link href="/newsletters">メルマガ一覧</Link>
-                  </Button>
-                  <Button asChild variant="ghost">
-                    <Link href="/profile">プロフィール</Link>
-                  </Button>
-                  <ThemeToggle />
-                </nav>
-              </SheetContent>
-            </Sheet>
+      <Header
+        showProgress={true}
+        newsletterId={params.id}
+        isVerified={newsletter?.is_verified}
+        onSavePosition={handleSavePosition}
+        isSaving={isSaving}
+        saveMessage={saveMessage}
+      />
 
-            {/* 既存の進捗バーと保存ボタン */}
-            {newsletter && newsletter.is_verified && (
-              <div className="flex items-center gap-2">
-                <ReadingProgressBar newsletterId={params.id} />
-                <Button
-                  onClick={handleSavePosition}
-                  disabled={isSaving}
-                  variant="outline"
-                  size="sm"
-                  className="whitespace-nowrap min-w-[88px]"
-                >
-                  {isSaving ? "保存中..." : saveMessage ? (
-                    <span className={saveMessage === '成功' ? 'text-green-500' : 'text-red-500'}>
-                      {saveMessage}
-                    </span>
-                  ) : "位置を保存"}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
+      {/* 以下のコンテンツ部分は変更なし */}
       <div className="container mx-auto px-4 py-8">
         <Card className="w-full max-w-4xl mx-auto bg-background border-0 sm:border-0 rounded-none sm:rounded-lg shadow-none sm:shadow-sm">
           <CardHeader className="space-y-1 sm:px-6 px-0">

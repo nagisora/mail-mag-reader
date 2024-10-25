@@ -16,8 +16,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname();
-  // メルマガ詳細ページではグローバルヘッダーを非表示にする
-  const hideHeader = pathname?.startsWith('/newsletters/') && pathname !== '/newsletters';
+  // メルマガ詳細ページとホームページではグローバルヘッダーを非表示にする
+  const hideHeader = (pathname?.startsWith('/newsletters/') && pathname !== '/newsletters') || 
+                    pathname === '/';
 
   return (
     <html lang="ja" suppressHydrationWarning>
@@ -30,7 +31,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            {!hideHeader && <Header />} {/* 条件付きレンダリング */}
+            {!hideHeader && <Header />}
             <main>{children}</main>
             <Footer />
           </AuthProvider>

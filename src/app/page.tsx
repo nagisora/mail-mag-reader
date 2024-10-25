@@ -59,6 +59,16 @@ export default function HomePage() {
           </nav>
         </CardContent>
       </Card>
+      <div className="mt-4 p-4 border border-gray-300 rounded">
+      <h3 className="text-lg font-semibold">ご案内</h3>
+        <ul className="list-disc pl-5">
+          <li>メルマガ未登録でも、テストメルマガが読めます。このメルマガの著作権は、中島聡様、にあります。</li>
+          <li>中島聡さんは、Windows95を開発した凄腕のエンジニアです。このメルマガが気になった方は、ぜひ
+            <a href="https://www.mag2.com/m/0001323030" className="text-blue-500 font-bold underline">まぐまぐ</a>
+            から登録して読んでみてください！</li>
+          <li>このアプリは<a href="https://connpass.com/event/331709/" className="text-blue-500 font-bold underline">Cursorハッカソン</a>の作品提出目的で公開しています。ハッカソン終了後は非公開となります。</li>
+        </ul>
+      </div>
     </div>
   );
 }

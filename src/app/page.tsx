@@ -66,6 +66,7 @@ export default function HomePage() {
           <li>中島聡さんは、Windows95を開発した凄腕のエンジニアです。このメルマガが気になった方は、ぜひ
             <a href="https://www.mag2.com/m/0001323030" className="text-blue-500 font-bold underline">まぐまぐ</a>
             から登録して読んでみてください！</li>
+          <li>Google Authが調子悪い場合は、メールアドレスでログインしてください。</li>
           <li>このアプリは<a href="https://connpass.com/event/331709/" className="text-blue-500 font-bold underline">Cursorハッカソン</a>の作品提出のために公開しています。ハッカソン終了後は非公開となります。</li>
         </ul>
       </Card>

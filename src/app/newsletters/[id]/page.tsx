@@ -10,6 +10,10 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { NewsletterVerificationForm } from '@/components/NewsletterVerificationForm';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+import Link from 'next/link';
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface NewsletterDetailPageProps {
   params: { id: string };
@@ -125,21 +129,45 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   return (
     <div className="relative">
       <div className="sticky top-0 z-10 bg-background border-b">
-        {newsletter && newsletter.is_verified && (
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-end py-2">
-              <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
-              <Button
-                onClick={handleSavePosition}
-                disabled={isSaving}
-                size="sm"
-                className="ml-4"
-              >
-                位置を保存
-              </Button>
-            </div>
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between py-2">
+            {/* 左側のハンバーガーメニュー */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">メニューを開く</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[240px]">
+                <nav className="flex flex-col space-y-4 mt-8">
+                  <Button asChild variant="ghost">
+                    <Link href="/newsletters">メルマガ一覧</Link>
+                  </Button>
+                  <Button asChild variant="ghost">
+                    <Link href="/profile">プロフィール</Link>
+                  </Button>
+                  <ThemeToggle />
+                </nav>
+              </SheetContent>
+            </Sheet>
+
+            {/* 既存の進捗バーと保存ボタン */}
+            {newsletter && newsletter.is_verified && (
+              <div className="flex items-center">
+                <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
+                <Button
+                  onClick={handleSavePosition}
+                  disabled={isSaving}
+                  size="sm"
+                  className="ml-4"
+                >
+                  位置を保存
+                </Button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">

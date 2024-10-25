@@ -154,15 +154,16 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
 
             {/* 既存の進捗バーと保存ボタン */}
             {newsletter && newsletter.is_verified && (
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
                 <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
                 <Button
                   onClick={handleSavePosition}
                   disabled={isSaving}
+                  variant="outline"
                   size="sm"
-                  className="ml-4"
+                  className="whitespace-nowrap min-w-[88px]"
                 >
-                  位置を保存
+                  {isSaving ? "保存中..." : "位置を保存"}
                 </Button>
               </div>
             )}

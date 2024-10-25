@@ -12,14 +12,14 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { signInWithEmail } = useAuth();
+  const { signIn } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     
     try {
-      await signInWithEmail(email, password);
+      await signIn(email, password);
       router.push('/newsletters');
     } catch (error) {
       console.error('Error logging in:', error);

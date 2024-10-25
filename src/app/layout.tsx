@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from '@/lib/auth';
 import { ThemeProvider } from "@/components/theme-provider";
+import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,6 +15,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname();
+  // メルマガ詳細ページとホームページではグローバルヘッダーを非表示にする
+  const hideHeader = (pathname?.startsWith('/newsletters/') && pathname !== '/newsletters') || 
+                    pathname === '/';
+
   return (
     <html lang="ja" suppressHydrationWarning>
       <head />
@@ -25,7 +31,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <Header />
+            {!hideHeader && <Header />}
             <main>{children}</main>
             <Footer />
           </AuthProvider>

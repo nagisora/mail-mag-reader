@@ -5,10 +5,9 @@ import { supabase } from '@/lib/supabase';
 
 interface ReadingProgressBarProps {
   newsletterId: string;
-  onProgressLoaded: (position: number) => void;
 }
 
-export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: ReadingProgressBarProps) {
+export default function ReadingProgressBar({ newsletterId }: ReadingProgressBarProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -30,12 +29,11 @@ export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: R
 
       if (data) {
         setProgress(data.position);
-        onProgressLoaded(data.position);
       }
     };
 
     fetchProgress();
-  }, [newsletterId, onProgressLoaded]);
+  }, [newsletterId]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,17 +50,20 @@ export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: R
 
   useEffect(() => {
     const saveProgress = async () => {
+      // 自動保存が無効な場合は早期リターン
+      if (!window.env?.ENABLE_AUTO_SAVE_PROGRESS) return;
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const integerProgress = Math.floor(progress);
+      const decimalProgress = parseFloat(progress.toFixed(2)); // 小数点第2位までに変換
 
       const { error } = await supabase
         .from('reading_progress')
         .upsert({
           user_id: user.id,
           newsletter_id: newsletterId,
-          position: integerProgress,
+          position: decimalProgress,
           updated_at: new Date().toISOString(),
         });
 

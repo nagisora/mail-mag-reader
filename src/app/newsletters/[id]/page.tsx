@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { NewsletterVerificationForm } from '@/components/NewsletterVerificationForm';
-import ReadingProgressBar from '@/components/ReadingProgressBar';
+import Header from '@/components/Header';
 
 interface NewsletterDetailPageProps {
   params: { id: string };
@@ -19,8 +19,15 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   const [error, setError] = useState<string | null>(null);
   const { user } = useUser();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null); // 保存メッセージの状態を追加
 
   useEffect(() => {
+    // グローバル環境変数の設定
+    window.env = {
+      ENABLE_AUTO_SAVE_PROGRESS: false // ここで自動保存の有効/無効を切り替え
+    };
+
     async function fetchNewsletter() {
       if (!user) return;
 
@@ -32,7 +39,7 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
 
       if (newsletterError) {
         console.error('Error fetching newsletter:', newsletterError);
-        setError('メルマガの取得中にエラーが発生しました。');
+        setError('メマガの取得中にエラーが発生しました。');
         return;
       }
 
@@ -65,11 +72,34 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
     fetchNewsletter();
   }, [params.id, user]);
 
-  const handleProgressLoaded = (position: number) => {
-    if (contentRef.current) {
-      const scrollPosition = (position / 100) * document.documentElement.scrollHeight;
-      window.scrollTo(0, scrollPosition);
+  const handleSavePosition = async () => {
+    if (!user || !newsletter?.is_verified) return;
+    
+    setIsSaving(true);
+    const currentPosition = (window.scrollY / document.documentElement.scrollHeight) * 100;
+
+    const { error } = await supabase
+      .from('reading_progress')
+      .upsert({
+        user_id: user.id,
+        newsletter_id: params.id,
+        position: parseFloat(currentPosition.toFixed(2)), // 小数点第2位までに変換
+        is_verified: true,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,newsletter_id'
+      });
+
+    if (error) {
+      console.error('Error saving position:', error);
+      setSaveMessage('保存に失敗しました。');
+    } else {
+      setSaveMessage('成功');
+      setTimeout(() => {
+        setSaveMessage(null);
+      }, 1000);
     }
+    setIsSaving(false);
   };
 
   if (error) {
@@ -96,22 +126,33 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {newsletter && newsletter.is_verified && (
-        <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
-      )}
-      <Card className="w-full max-w-4xl mx-auto bg-background border-0 sm:border-0 rounded-none sm:rounded-lg shadow-none sm:shadow-sm">
-        <CardHeader className="space-y-1 sm:px-6 px-0">
-          <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight">{newsletter.title}</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6 sm:px-6 px-0" ref={contentRef}>
-          {newsletter.is_verified ? (
-            <MarkdownRenderer content={newsletter.content} />
-          ) : (
-            <NewsletterVerificationForm newsletterId={params.id} />
-          )}
-        </CardContent>
-      </Card>
+    <div className="relative">
+      <Header
+        showProgress={true}
+        newsletterId={params.id}
+        isVerified={newsletter?.is_verified}
+        onSavePosition={handleSavePosition}
+        isSaving={isSaving}
+        saveMessage={saveMessage}
+      />
+
+      {/* 以下のコンテンツ部分は変更なし */}
+      <div className="container mx-auto px-4 py-8">
+        <Card className="w-full max-w-4xl mx-auto bg-background border-0 sm:border-0 rounded-none sm:rounded-lg shadow-none sm:shadow-sm">
+          <CardHeader className="space-y-1 sm:px-6 px-0">
+            <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight">
+              {newsletter?.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6 sm:px-6 px-0" ref={contentRef}>
+            {newsletter?.is_verified ? (
+              <MarkdownRenderer content={newsletter.content} />
+            ) : (
+              <NewsletterVerificationForm newsletterId={params.id} />
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

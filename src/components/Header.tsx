@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import ReadingProgressBar from '@/components/ReadingProgressBar';
@@ -63,9 +63,6 @@ export default function Header({
           {/* 進捗バーと保存ボタン (メルマガ詳細ページの場合のみ表示) */}
           {showProgress && isVerified && (
             <>
-              <div className="hidden sm:block">
-                {newsletterId && <ReadingProgressBar newsletterId={newsletterId} />}
-              </div>
               {onSavePosition && (
                 <Button
                   onClick={onSavePosition}
@@ -81,6 +78,9 @@ export default function Header({
                   ) : "位置を保存"}
                 </Button>
               )}
+              <div>
+                {newsletterId && <ReadingProgressBar newsletterId={newsletterId} />}
+              </div>
             </>
           )}
 

@@ -8,12 +8,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { NewsletterVerificationForm } from '@/components/NewsletterVerificationForm';
-import ReadingProgressBar from '@/components/ReadingProgressBar';
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
-import Link from 'next/link';
-import { ThemeToggle } from "@/components/theme-toggle";
 import Header from '@/components/Header';
 
 interface NewsletterDetailPageProps {

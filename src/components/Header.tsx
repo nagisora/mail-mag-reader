@@ -55,7 +55,7 @@ export default function Header({
 
           {/* タイトル */}
           <Link href="/" className="text-lg font-semibold sm:text-2xl">
-            メルマガリーダー
+            めるまぐ
           </Link>
         </div>
 

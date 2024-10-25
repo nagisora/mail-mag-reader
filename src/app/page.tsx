@@ -8,8 +8,8 @@ export default function HomePage() {
     <div className="container mx-auto px-4 py-8">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">メルマガリーダー</CardTitle>
-          <CardDescription className="text-center">お気に入りのメルマガを管理しましょう</CardDescription>
+          <CardTitle className="text-2xl font-bold text-center">めるまぐ</CardTitle>
+          <CardDescription className="text-center">メルマガ「週刊 Life is beautiful」専用アプリ<br />読み進めた位置を記録して続きから読める</CardDescription>
         </CardHeader>
         <CardContent>
           <nav className="flex flex-col space-y-4">

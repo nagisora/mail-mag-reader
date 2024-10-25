@@ -31,7 +31,7 @@ export default function RegisterPage() {
       });
       if (error) throw error;
       if (data.user) {
-        alert('確認メールを送信しました。メールを確認して登録を完了してください。');
+        alert('確認メールを送信しました。メールを確認して登録を完了してください。※ハッカソン期間中はメール認証不要でログインできます。');
         router.push('/login');
       } else {
         throw new Error('User data is undefined');

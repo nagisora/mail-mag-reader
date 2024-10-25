@@ -81,14 +81,14 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
     if (!user || !newsletter?.is_verified) return;
     
     setIsSaving(true);
-    const currentPosition = Math.floor((window.scrollY / document.documentElement.scrollHeight) * 100);
+    const currentPosition = (window.scrollY / document.documentElement.scrollHeight) * 100;
 
     const { error } = await supabase
       .from('reading_progress')
       .upsert({
         user_id: user.id,
         newsletter_id: params.id,
-        position: currentPosition,
+        position: parseFloat(currentPosition.toFixed(2)), // 小数点第2位までに変換
         is_verified: true,
         updated_at: new Date().toISOString()
       }, {

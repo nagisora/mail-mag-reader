@@ -56,14 +56,14 @@ export default function ReadingProgressBar({ newsletterId }: ReadingProgressBarP
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const integerProgress = Math.floor(progress);
+      const decimalProgress = parseFloat(progress.toFixed(2)); // 小数点第2位までに変換
 
       const { error } = await supabase
         .from('reading_progress')
         .upsert({
           user_id: user.id,
           newsletter_id: newsletterId,
-          position: integerProgress,
+          position: decimalProgress,
           updated_at: new Date().toISOString(),
         });
 

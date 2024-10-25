@@ -5,10 +5,9 @@ import { supabase } from '@/lib/supabase';
 
 interface ReadingProgressBarProps {
   newsletterId: string;
-  onProgressLoaded: (position: number) => void;
 }
 
-export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: ReadingProgressBarProps) {
+export default function ReadingProgressBar({ newsletterId }: ReadingProgressBarProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -30,12 +29,11 @@ export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: R
 
       if (data) {
         setProgress(data.position);
-        onProgressLoaded(data.position);
       }
     };
 
     fetchProgress();
-  }, [newsletterId, onProgressLoaded]);
+  }, [newsletterId]);
 
   useEffect(() => {
     const handleScroll = () => {

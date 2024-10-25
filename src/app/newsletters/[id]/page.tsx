@@ -77,18 +77,10 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
     fetchNewsletter();
   }, [params.id, user]);
 
-  const handleProgressLoaded = (position: number) => {
-    if (contentRef.current) {
-      const scrollPosition = (position / 100) * document.documentElement.scrollHeight;
-      window.scrollTo(0, scrollPosition);
-    }
-  };
-
   const handleSavePosition = async () => {
     if (!user || !newsletter?.is_verified) return;
     
     setIsSaving(true);
-    // 小数点以下を切り捨てて整数に変換
     const currentPosition = Math.floor((window.scrollY / document.documentElement.scrollHeight) * 100);
 
     const { error } = await supabase
@@ -96,7 +88,7 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
       .upsert({
         user_id: user.id,
         newsletter_id: params.id,
-        position: currentPosition, // 整数値として保存
+        position: currentPosition,
         is_verified: true,
         updated_at: new Date().toISOString()
       }, {
@@ -105,11 +97,11 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
 
     if (error) {
       console.error('Error saving position:', error);
-      setSaveMessage('保存に失敗しました。'); // エラーメッセージを設定
+      setSaveMessage('保存に失敗しました。');
     } else {
-      setSaveMessage('成功'); // 成功メッセージを設定
+      setSaveMessage('成功');
       setTimeout(() => {
-        setSaveMessage(null); // 1秒後にメッセージをリセット
+        setSaveMessage(null);
       }, 1000);
     }
     setIsSaving(false);
@@ -167,7 +159,7 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
             {/* 既存の進捗バーと保存ボタン */}
             {newsletter && newsletter.is_verified && (
               <div className="flex items-center gap-2">
-                <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
+                <ReadingProgressBar newsletterId={params.id} />
                 <Button
                   onClick={handleSavePosition}
                   disabled={isSaving}

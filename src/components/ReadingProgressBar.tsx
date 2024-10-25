@@ -52,6 +52,9 @@ export default function ReadingProgressBar({ newsletterId, onProgressLoaded }: R
 
   useEffect(() => {
     const saveProgress = async () => {
+      // 自動保存が無効な場合は早期リターン
+      if (!window.env?.ENABLE_AUTO_SAVE_PROGRESS) return;
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 

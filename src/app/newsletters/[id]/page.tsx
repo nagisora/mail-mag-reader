@@ -27,6 +27,11 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    // グローバル環境変数の設定
+    window.env = {
+      ENABLE_AUTO_SAVE_PROGRESS: false // ここで自動保存の有効/無効を切り替え
+    };
+
     async function fetchNewsletter() {
       if (!user) return;
 

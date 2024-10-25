@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { NewsletterVerificationForm } from '@/components/NewsletterVerificationForm';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
+import { Button } from "@/components/ui/button";
 
 interface NewsletterDetailPageProps {
   params: { id: string };
@@ -19,6 +20,7 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   const [error, setError] = useState<string | null>(null);
   const { user } = useUser();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function fetchNewsletter() {
@@ -72,6 +74,31 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
     }
   };
 
+  const handleSavePosition = async () => {
+    if (!user || !newsletter?.is_verified) return;
+    
+    setIsSaving(true);
+    // 小数点以下を切り捨てて整数に変換
+    const currentPosition = Math.floor((window.scrollY / document.documentElement.scrollHeight) * 100);
+
+    const { error } = await supabase
+      .from('reading_progress')
+      .upsert({
+        user_id: user.id,
+        newsletter_id: params.id,
+        position: currentPosition, // 整数値として保存
+        is_verified: true,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,newsletter_id'
+      });
+
+    if (error) {
+      console.error('Error saving position:', error);
+    }
+    setIsSaving(false);
+  };
+
   if (error) {
     return (
       <Alert variant="destructive">
@@ -96,22 +123,41 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {newsletter && newsletter.is_verified && (
-        <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
-      )}
-      <Card className="w-full max-w-4xl mx-auto bg-background border-0 sm:border-0 rounded-none sm:rounded-lg shadow-none sm:shadow-sm">
-        <CardHeader className="space-y-1 sm:px-6 px-0">
-          <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight">{newsletter.title}</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6 sm:px-6 px-0" ref={contentRef}>
-          {newsletter.is_verified ? (
-            <MarkdownRenderer content={newsletter.content} />
-          ) : (
-            <NewsletterVerificationForm newsletterId={params.id} />
-          )}
-        </CardContent>
-      </Card>
+    <div className="relative">
+      <div className="sticky top-0 z-10 bg-background border-b">
+        {newsletter && newsletter.is_verified && (
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-end py-2">
+              <ReadingProgressBar newsletterId={params.id} onProgressLoaded={handleProgressLoaded} />
+              <Button
+                onClick={handleSavePosition}
+                disabled={isSaving}
+                size="sm"
+                className="ml-4"
+              >
+                位置を保存
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        <Card className="w-full max-w-4xl mx-auto bg-background border-0 sm:border-0 rounded-none sm:rounded-lg shadow-none sm:shadow-sm">
+          <CardHeader className="space-y-1 sm:px-6 px-0">
+            <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight">
+              {newsletter?.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6 sm:px-6 px-0" ref={contentRef}>
+            {newsletter?.is_verified ? (
+              <MarkdownRenderer content={newsletter.content} />
+            ) : (
+              <NewsletterVerificationForm newsletterId={params.id} />
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -25,6 +25,7 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
   const { user } = useUser();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null); // 保存メッセージの状態を追加
 
   useEffect(() => {
     // グローバル環境変数の設定
@@ -104,6 +105,12 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
 
     if (error) {
       console.error('Error saving position:', error);
+      setSaveMessage('保存に失敗しました。'); // エラーメッセージを設定
+    } else {
+      setSaveMessage('成功'); // 成功メッセージを設定
+      setTimeout(() => {
+        setSaveMessage(null); // 1秒後にメッセージをリセット
+      }, 1000);
     }
     setIsSaving(false);
   };
@@ -168,7 +175,11 @@ export default function NewsletterDetailPage({ params }: NewsletterDetailPagePro
                   size="sm"
                   className="whitespace-nowrap min-w-[88px]"
                 >
-                  {isSaving ? "保存中..." : "位置を保存"}
+                  {isSaving ? "保存中..." : saveMessage ? (
+                    <span className={saveMessage === '成功' ? 'text-green-500' : 'text-red-500'}>
+                      {saveMessage}
+                    </span>
+                  ) : "位置を保存"}
                 </Button>
               </div>
             )}

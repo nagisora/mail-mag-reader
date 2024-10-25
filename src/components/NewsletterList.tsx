@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useUser } from '@/hooks/useUser';
 import { Skeleton } from "@/components/ui/skeleton";
+import { handleFirstLogin } from '@/lib/userUtils';
 
 interface Newsletter {
   id: string;
@@ -21,25 +22,42 @@ export function NewsletterList() {
   const { user, loading } = useUser();
 
   useEffect(() => {
-    async function fetchNewsletters() {
+    async function fetchNewslettersAndCheckFirstLogin() {
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('newsletters')
-        .select(`
-          id,
-          title,
-          created_at,
-          reading_progress!left (
-            is_verified
-          )
-        `)
-        .order('created_at', { ascending: false });
+      try {
+        // ユーザーの is_first_login フラグを確認
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('is_first_login')
+          .eq('id', user.id)
+          .single();
 
-      if (error) {
-        console.error('Error fetching newsletters:', error);
-        setError('メルマガの取得中にエラーが発生しました。');
-      } else {
+        if (userError) {
+          console.error('Error fetching user data:', userError);
+        } else if (userData?.is_first_login) {
+          await handleFirstLogin(user.id);
+        }
+
+        // 既存のメルマガ取得処理
+        const { data, error } = await supabase
+          .from('newsletters')
+          .select(`
+            id,
+            title,
+            created_at,
+            reading_progress!left (
+              is_verified
+            )
+          `)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching newsletters:', error);
+          setError('メルマガの取得中にエラーが発生しました。');
+          return;
+        }
+
         const newsletters = data.map(item => ({
           id: item.id,
           title: item.title,
@@ -55,11 +73,14 @@ export function NewsletterList() {
         });
 
         setNewsletters(sortedNewsletters);
+      } catch (error) {
+        console.error('Error:', error);
+        setError('データの取得中にエラーが発生しました。');
       }
     }
 
     if (user) {
-      fetchNewsletters();
+      fetchNewslettersAndCheckFirstLogin();
     }
   }, [user]);
 

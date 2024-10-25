@@ -14,25 +14,6 @@ export default function GoogleAuthPage() {
     const handleGoogleAuth = async () => {
       try {
         await signInWithGoogle();
-        
-        // ユーザー情報を取得
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (user) {
-          // ユーザーの is_first_login フラグを確認
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('is_first_login')
-            .eq('id', user.id)
-            .single();
-
-          if (userError) {
-            console.error('Error fetching user data:', userError);
-          } else if (userData?.is_first_login) {
-            await handleFirstLogin(user.id);
-          }
-        }
-
         router.push('/newsletters');
       } catch (error) {
         console.error('Google認証エラー:', error);

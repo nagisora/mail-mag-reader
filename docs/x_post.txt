@@ -1,0 +1,13 @@
+# ver1
+Cursorハッカソン #CursorSunHack の個人開発アプリ公開です！
+
+アプリ名：めるまぐ
+概要：中島聡さんの「週刊 Life is beautiful」専用のメルマガリーダー。最後に読んだ位置を記録し、続きから再開可能！
+
+アプリとGitHubのURLはリプ欄から　↓
+
+アプリ：https://mail-mag-reader.vercel.app/
+GitHub：https://github.com/nagisora/mail-mag-reader
+
+※ハッカソン期間中のみの公開です。メルマガの著作権は中島聡様にあります。
+※Google認証は調子悪いので、メアドで登録してください。

@@ -1,0 +1,99 @@
+# 個人開発者向けGitブランチ運用ガイド（Conventional Commits対応版）
+
+## 主要ブランチ関係性
+
+| ブランチタイプ | 作成元        | マージ先       | 用途                  | 命名例               | ライフサイクル          |
+|----------------|---------------|----------------|-----------------------|----------------------|-------------------------|
+| **main**       | -             | -              | 本番環境コード        | `main`               | 永続存在                |
+| **develop**    | main          | -              | 開発版統合            | `develop`            | 永続存在                |
+| **feature/**   | develop       | develop        | 新機能開発            | `feat/dark-mode`     | 機能完了後削除          |
+| **release/**   | develop       | main + develop | リリース準備          | `release/v1.2.0`     | リリース後削除          |
+| **hotfix/**    | main          | main + develop | 緊急修正              | `hotfix/login-bug`   | 修正反映後削除          |
+
+### 関係性ルール
+1. **main → develop**  
+   - 初期作成時のみ
+2. **feature → develop**  
+   - 機能開発時の唯一のフロー
+3. **release → main**  
+   - 品質確認済みコードのみ
+4. **hotfix → main**  
+   - 本番環境への直接修正
+
+### 禁止事項
+- mainから直接featureブランチを作成しない
+- developを介さずmainとfeatureを同期しない
+- hotfixブランチで新機能開発を行わない
+
+## ブランチ命名規則
+
+### プレフィックス方式
+| プレフィックス | 用途                  | 命名例                  |
+|----------------|-----------------------|-------------------------|
+| `feat/`        | 新機能開発            | `feat/user-profile`     |
+| `fix/`         | バグ修正              | `fix/login-error`       |
+| `refactor/`    | リファクタリング      | `refactor/api-client`   |
+| `docs/`        | ドキュメント更新      | `docs/arch-design`      |
+| `chore/`       | ビルド/ツール関連     | `chore/ci-config`       |
+
+**命名ルール**:  
+- プレフィックスは小文字で統一  
+- スラッシュ以降はケバブケース（例: `feat/chat-function`）  
+- スコープを追加可能（例: `feat(ui)/dark-mode`）
+
+## コミットメッセージ規範（Conventional Commits）
+
+### メッセージ例
+
+#### 一行コミット
+```markdown
+feat(auth): add password reset functionality #123
+``` 
+※Issue番号がある場合は末尾に記載する
+
+#### 複数行
+```markdown
+feat(auth): add password reset functionality
+
+- Implement reset token generation
+- Add email template for password reset
+- Create API endpoints for reset flow
+
+Closes #45
+```
+
+### 基本フォーマット
+```markdown
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+※一行目以降は省略可能
+
+### 必須要素
+| 要素      | 説明                                                                 |
+|-----------|----------------------------------------------------------------------|
+| `type`    | コミットの種類（feat, fix, choreなど）                               |
+| `subject` | 変更内容の簡潔な説明（50文字以内）                                   |
+| `body`    | 変更の詳細説明（任意・72文字折返し）                                 |
+| `footer`  | 重大な変更（BREAKING CHANGE）やIssue参照（Closes #123）               |
+
+### タイプ一覧
+| タイプ     | 説明                                     |
+|------------|------------------------------------------|
+| `feat`     | 新機能追加                               |
+| `fix`      | バグ修正                                 |
+| `docs`     | ドキュメント変更                         |
+| `style`    | 書式設定（コードの動作に影響なし）       |
+| `refactor` | リファクタリング                         |
+| `test`     | テスト関連                               |
+| `chore`    | ビルドプロセス/ツールの変更              |
+| `ci`       | CI設定関連                               |
+| `perf`     | パフォーマンス改善                       |
+| `build`    | ビルドシステム/依存関係の変更            |
+
+## 参考リンク
+- [Conventional Commits 公式](https://www.conventionalcommits.org/)
+- [コミットメッセージのベストプラクティス](https://qiita.com/itosho/items/9565c6ad2ffc24c09364)

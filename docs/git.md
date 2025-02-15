@@ -1,4 +1,4 @@
-# 個人開発者向けGitブランチ運用ガイド（Conventional Commits対応版）
+# 個人開発者向けGitブランチ運用ガイド
 
 ## 主要ブランチ関係性
 
@@ -25,7 +25,7 @@
 - developを介さずmainとfeatureを同期しない
 - hotfixブランチで新機能開発を行わない
 
-## ブランチ命名規則
+## ブランチ命名ルール
 
 ### プレフィックス方式
 | プレフィックス | 用途                  | 命名例                  |
@@ -41,26 +41,38 @@
 - スラッシュ以降はケバブケース（例: `feat/chat-function`）  
 - スコープを追加可能（例: `feat(ui)/dark-mode`）
 
+### 指示プロンプト
+```markdown
+以下のルールに従い、ブランチ名を作成してください。
+```
+
 ## コミットメッセージ規範（Conventional Commits）
 
 ### メッセージ例
 
 #### 一行コミット
 ```markdown
-feat(auth): add password reset functionality #123
+feat(auth): パスワードリセット機能を追加する #123
 ``` 
 ※Issue番号がある場合は末尾に記載する
 
 #### 複数行
 ```markdown
-feat(auth): add password reset functionality
+feat(auth): パスワードリセット機能を追加する
 
-- Implement reset token generation
-- Add email template for password reset
-- Create API endpoints for reset flow
+- リセットトークン生成を実装する
+- パスワードリセット用メールテンプレートを追加する
+- リセットフローのAPIエンドポイントを作成する
 
 Closes #45
 ```
+
+### 指示プロンプト
+```markdown
+コード差分を参照し、以下の例を参考に、一行コミットメッセージを作成してください。
+
+feat(auth): パスワードリセット機能を追加する #123
+``` 
 
 ### 基本フォーマット
 ```markdown
@@ -76,9 +88,9 @@ Closes #45
 | 要素      | 説明                                                                 |
 |-----------|----------------------------------------------------------------------|
 | `type`    | コミットの種類（feat, fix, choreなど）                               |
-| `subject` | 変更内容の簡潔な説明（50文字以内）                                   |
-| `body`    | 変更の詳細説明（任意・72文字折返し）                                 |
-| `footer`  | 重大な変更（BREAKING CHANGE）やIssue参照（Closes #123）               |
+| `subject` | 変更内容の簡潔な説明（現在形、50文字以内）                           |
+| `body`    | 変更の詳細説明（現在形、任意・72文字折返し）                                 |
+| `footer`  | 重大な変更（BREAKING CHANGE）やIssue参照（Closes #123）              |
 
 ### タイプ一覧
 | タイプ     | 説明                                     |

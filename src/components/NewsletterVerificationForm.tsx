@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -11,10 +11,23 @@ interface NewsletterVerificationFormProps {
 }
 
 export function NewsletterVerificationForm({ newsletterId }: NewsletterVerificationFormProps) {
+  const [isAdmin, setIsAdmin] = useState(false);
   const [content, setContent] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // 管理者チェック用のuseEffect
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',') || [];
+        setIsAdmin(adminEmails.includes(user.email));
+      }
+    };
+    checkAdminStatus();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +35,43 @@ export function NewsletterVerificationForm({ newsletterId }: NewsletterVerificat
     setVerificationResult(null);
     setError(null);
 
+    // ユーザー取得
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setError('ユーザーが認証されていません。');
+      setIsVerifying(false);
+      return;
+    }
+
+    // 管理者の場合の処理
+    if (isAdmin) {
+      try {
+        const { data, error } = await supabase
+          .from('reading_progress')
+          .upsert({
+            user_id: user.id,
+            newsletter_id: newsletterId,
+            is_verified: true,
+            position: 0,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,newsletter_id'
+          });
+
+        if (error) throw error;
+
+        setVerificationResult('管理者として自動認証しました。');
+        window.location.reload();
+      } catch (error) {
+        console.error('Error updating progress:', error);
+        setError('自動認証中にエラーが発生しました。');
+      } finally {
+        setIsVerifying(false);
+      }
+      return;
+    }
+
+    // 通常ユーザーの処理
     if (!content.trim()) {
       setError('メルマガの本文を入力してください。');
       setIsVerifying(false);
@@ -85,7 +135,7 @@ export function NewsletterVerificationForm({ newsletterId }: NewsletterVerificat
         onChange={(e) => setContent(e.target.value)}
         placeholder="メルマガの本文を入力してください"
         rows={10}
-        required
+        required={!isAdmin} // 管理者は入力不要
       />
       <Button type="submit" disabled={isVerifying || !content.trim()}>
         {isVerifying ? '照合中...' : 'メルマガを照合'}
